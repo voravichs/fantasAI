@@ -6,8 +6,8 @@
   "scripts": {
     "install:client": "npm install --prefix client",
     "install:all": "npm run install:client && npm install",
-    "dev": "concurrently \"cd scripts && python3 app.py\" \"cd client && npm start\"",
-    "dev-py": "concurrently \"cd scripts && py app.py\" \"cd client && npm start\"",
+    "dev": "concurrently \"cd scripts && python3 app.py\" \"cd client && npm run dev\"",
+    "dev-py": "concurrently \"cd scripts && py app.py\" \"cd client && npm run dev\"",
     "build:client": "npm run build --prefix client",
     "build": "npm run install:client && npm run install:server && npm run build:client"
   },

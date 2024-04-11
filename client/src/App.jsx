@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './Feeding.css'; // Import your CSS file
+import { useState, useRef, useEffect } from 'react';
+import './App.css'; // Import your CSS file
 import Modal from 'react-modal'; // Import Modal from react-modal library
 
-function Feeding() {
+function App() {
     const [selectedVoice, setSelectedVoice] = useState('Random');
     const [userDescription, setUserDescription] = useState('');
     const [conversation, setConversation] = useState([]);
@@ -91,4 +91,4 @@ function Feeding() {
     );
 }
 
-export default Feeding;
+export default App;
