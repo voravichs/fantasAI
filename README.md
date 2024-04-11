@@ -1,4 +1,5 @@
 ## Install
+### Dependencies
 python3 -mvenv fantasia_venv 
 OR 
 py -mvenv fantasia_venv
@@ -10,6 +11,9 @@ source fantasia_venv/Scripts/activate
 pip install flask flask-cors openai pygame python-dotenv
 
 npm run install:all
+
+### .env
+Create a .env file with .env.template as a guide.
 
 ## Run
 npm run dev
