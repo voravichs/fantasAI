@@ -9,6 +9,7 @@ import threading
 app = Flask(__name__)
 CORS(app)
 chatbot = Chatbot()  # Instantiate your Chatbot class
+feedpet = FeedPet()
 
 # Define the path to the React build folder
 react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')
