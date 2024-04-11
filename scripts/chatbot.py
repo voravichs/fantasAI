@@ -2,6 +2,7 @@ import openai
 import os
 import pygame
 import random
+from dotenv import load_dotenv
 from getpass import getpass
 
 class Chatbot:
@@ -9,22 +10,23 @@ class Chatbot:
         self.pet = pet
         self.voice = "random"
         self.key_path = "helicone_key.txt"
-        self.load_helicone_key()
-        self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.environ['HELICONE_API_KEY'])
+        # self.load_helicone_key()
+        load_dotenv()
+        self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
         self.memory = []
         self.load_personality()
 
-    def load_helicone_key(self):
-        if "HELICONE_API_KEY" not in os.environ:
-            try:
-                with open(self.key_path, 'r') as file:
-                    os.environ["HELICONE_API_KEY"] = file.read()
-            except FileNotFoundError:
-                print(f"File not found: {self.key_path}")
-            except Exception as e:
-                print("You didn't set your Helicone key to the HELICONE_API_KEY env var on the command line.")
-                os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
-        return
+    # def load_helicone_key(self):
+    #     if "HELICONE_API_KEY" not in os.environ:
+    #         try:
+    #             with open(self.key_path, 'r') as file:
+    #                 os.environ["HELICONE_API_KEY"] = file.read()
+    #         except FileNotFoundError:
+    #             print(f"File not found: {self.key_path}")
+    #         except Exception as e:
+    #             print("You didn't set your Helicone key to the HELICONE_API_KEY env var on the command line.")
+    #             os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
+    #     return
 
     def load_personality(self):
         if self.pet == "default":

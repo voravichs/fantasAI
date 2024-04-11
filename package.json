@@ -1,0 +1,23 @@
+{
+  "name": "fantasAI",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install:client": "npm install --prefix client",
+    "install:all": "npm run install:client && npm install",
+    "dev": "concurrently \"cd scripts && python3 app.py\" \"cd client && npm start\"",
+    "dev-py": "concurrently \"cd scripts && py app.py\" \"cd client && npm start\"",
+    "build:client": "npm run build --prefix client",
+    "build": "npm run install:client && npm run install:server && npm run build:client"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^5.1.0"
+  },
+  "dependencies": {
+    "react-admin": "^4.16.2"
+  }
+}

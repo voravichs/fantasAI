@@ -6,8 +6,9 @@
 /client/node_modules
 
 # Ignore build artifacts
-build/
-dist/
+/build
+/client/build
+/dist
 
 # Ignore any other temporary or generated files
 .DS_Store
