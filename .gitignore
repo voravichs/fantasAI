@@ -12,3 +12,6 @@ dist/
 .DS_Store
 .env
 
+# Ignore helicone_key.txt
+helicone_key
+
