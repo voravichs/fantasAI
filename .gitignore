@@ -1,8 +1,9 @@
 # Ignore virtual environment
-fantasia_venv/
+/fantasia_venv
 
 # Ignore Node.js modules
-node_modules/
+/node_modules
+/client/node_modules
 
 # Ignore build artifacts
 build/
@@ -13,5 +14,5 @@ dist/
 .env
 
 # Ignore helicone_key.txt
-backend/helicone_key.txt
+/backend/helicone_key.txt
 
