@@ -1,0 +1,14 @@
+# Ignore virtual environment
+fantasia_venv/
+
+# Ignore Node.js modules
+node_modules/
+
+# Ignore build artifacts
+build/
+dist/
+
+# Ignore any other temporary or generated files
+.DS_Store
+.env
+
