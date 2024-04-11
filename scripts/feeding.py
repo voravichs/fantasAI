@@ -3,8 +3,6 @@ import json
 import datetime
 import time
 
-pip install -q d20 'kani[openai]' openai
-
 now = datetime.datetime.now()
 timeStart = str(now)
 
