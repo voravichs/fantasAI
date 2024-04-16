@@ -144,4 +144,19 @@ body, h1, h2, p, label, input, select, textarea, button {
   .pet-image {
     margin-bottom: 16px; /* Increase margin-bottom for spacing */
   }
+
+  .food-box {
+    border-radius: 2px;
+    background-color: #ffffff;
+    color: black;
+    width: 200px;
+    margin: 20px;
+    padding: 10px;
+
+  }
   
+  .food-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
