@@ -51,7 +51,7 @@ class FeedPetAction:
           messages=[
             {
               "role": "system",
-              "content": "Generate the name and description of three foods. The first one should be a culturally popular sweet food. The second should be a culturally popular savory food. The third should be a common rotten food."
+              "content": "Generate the name: description of three foods and arrange them in an array. The first item in the array should be a culturally popular sweet food. The second item in the array should be a culturally popular savory food. The third item in the array should be a common rotten food."
             },
             {
               "role": "user",
@@ -59,11 +59,16 @@ class FeedPetAction:
             },
             {
               "role": "assistant",
-              "content": "Here are the food options available: 1. Sweet Food: Chocolate Cake - A moist, rich chocolate cake with a layer of creamy chocolate frosting. 2. Savory Food: Chicken Biryani - A flavorful, aromatic Indian dish made with chicken, basmati rice, and a blend of spices. 3. Rotten Food: Rancid Meat - An old piece of meat that has a horrific smell and is infested with maggots. Which of these three foods would you like to feed the pet?"
+              "content": "[Chocolate Cake: A moist, rich chocolate cake with a layer of creamy chocolate frosting] [Chicken Biryani: A flavorful, aromatic Indian dish made with chicken, basmati rice, and a blend of spices], [Rancid Meat: An old piece of meat that has a horrific smell and is infested with maggots]"
             }, 
             {
             "role": "assistant",
-            "content": "1. Caramel Cake: A sweet food item made from caramelised sugar and rich cake dough. (Sweet and Fresh), 2. Venison Stew: A savory, hearty food item comprised of game meat, vegetables, and hearty broth. (Savory and Fresh), 3. Spoiled Apple Pie: The apple pie was left improperly stored and has turned bad. (Sweet but Rotten). Please select which food you would like to feed the pet by typing the name of the food."
+            "content": "[Caramel Cake: A sweet food item made from caramelised sugar and rich cake dough] [Venison Stew: A savory, hearty food item comprised of game meat, vegetables, and hearty broth] [Spoiled Apple Pie: The apple pie was left improperly stored and has turned bad]"
+            },
+             
+            {
+            "role": "assistant",
+            "content": "[Chocolate Truffles: A popular sweet treat made from rich, creamy chocolate ganache coated in cocoa powder or chopped nuts. Indulge in the smooth and decadent taste of these bite-sized delights] [Samosas: A savory snack originating from the Indian subcontinent, consisting of a triangular pastry shell filled with spiced potatoes, peas, and sometimes minced meat. Enjoy the crispy exterior and flavorful filling of these delicious hand-held snacks] [Moldy Bread: Once a staple food, this loaf of bread has unfortunately been left out for too long, developing a fuzzy layer of green and white mold. Full of spores and an unpleasant odor, this food is best discarded]"
             }
           ],
           temperature=1,
@@ -74,19 +79,20 @@ class FeedPetAction:
         )
         print(response.choices[0].message.content)
         return response.choices[0].message.content
+  
 
-    def feed_pet(self, food):
+    def feed_pet_fav_food(self, food_choice):
       
       response = self.client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
           {
             "role": "system",
-            "content": f"You feed your pet {food}. Describe how the pet feels after eating. Imagine all foods are edible."
+            "content": f"You feed your pet {food_choice}, which happens to be their favorite type of food. Describe how the pet feels after eating. Imagine all foods are edible."
           },
           {
             "role": "user",
-            "content": "noodles"
+            "content": f"{food_choice}"
           },
           {
             "role": "assistant",
@@ -95,6 +101,111 @@ class FeedPetAction:
           {
           "role": "assistant",
           "content": "I have been craving for food since this morning! Thank you!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
+    
+
+
+    def feed_pet_avg_food(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"You feed your pet {food_choice}, which happens to be a food they are not thrilled with by are alright with. Describe how the pet feels after eating. Imagine all foods are edible."
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "Yum! This food tastes really good!"
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have been craving for food since this morning! Thank you!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
+
+
+    def feed_pet_rotten_food(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"You feed your pet {food_choice}, which happens to be a rotten food. Describe how the pet feels after eating. Imagine all foods are edible."
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "Yum! This food tastes really good!"
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have been craving for food since this morning! Thank you!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
+
+    def pet_too_full(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"Your owner is trying to feed you {food_choice} You are a pet that feels way too full. Describe how you feel and the fact that you would rather not eat. "
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "No thank you, I've had enough food for now. Thank you for thinking of me."
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have had too much to eat today!"
           }
         ],
         temperature=1,

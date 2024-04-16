@@ -5,6 +5,7 @@ from feeding import FeedPetAction
 import os
 from flask_cors import CORS
 import threading
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -22,21 +23,54 @@ def index():
 def generate_food_options():
 
     answer = feedPetAction.get_food()
+    food_type = ["sweet", "savory", "rotten"]
+    food_names = re.findall(r'\[([^:]+):', answer)
 
-    return jsonify({"food": answer})
+    food_pair = {}
+    for idx, food in enumerate(food_names):
+        pattern = r'\[([^\[\]]*?):]'
+        matches = re.findall(pattern, food)
+        food_pair[food] = food_type[idx]
+
+    print(food_pair)
+
+    # Extract key-value pairs using regular expression
+    pattern = r'\[([^\[\]]*?):\s*([^\[\]]*?)\]'
+    matches = re.findall(pattern, answer)
+
+    # Construct the dictionary
+    food_dict = {name.strip(): des.strip() for name, des in matches}
+
+    return jsonify({"food": food_dict, "food_type": food_pair})
 
 @app.route('/api/feed', methods=['POST'])
 def generate_feed_pet():
+
     data = request.json
-    
-    food_choice = data.get("food_choice")
+    food_choice = data.get("food")
+    food_type = data.get("food_type")
     hunger_level = data.get('hunger_level')
     happiness_level = data.get('happiness_level')
     likes_sweet = data.get('likes_sweet')
 
-    answer = feedPetAction.feed_pet(food_choice)
+    if hunger_level < 0:
+        answer = feedPetAction.pet_too_full()
 
-    return jsonify({"fed": answer})
+    if food_type == "rotten":
+        hunger_level = hunger_level - 1
+        happiness_level = happiness_level - 2
+        answer = feedPetAction.feed_pet_rotten_food(food_choice)
+    elif (likes_sweet and food_type == "sweet") or (not likes_sweet and food_type == "savory"):
+        hunger_level = hunger_level - 2
+        happiness_level = happiness_level + 3
+        answer = feedPetAction.feed_pet_fav_food(food_choice)
+    else:
+        hunger_level = hunger_level - 2
+        happiness_level = happiness_level + 1
+        answer = feedPetAction.feed_pet_avg_food(food_choice)
+
+    return jsonify({"fed": answer, "happiness": happiness_level, "hunger": hunger_level})
+
 
 @app.route('/api/pet', methods=['POST'])
 def generate_meditation():
