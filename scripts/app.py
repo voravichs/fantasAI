@@ -1,15 +1,16 @@
 # backend/app.py
 from flask import Flask, jsonify, request
 from chatbot import Chatbot
-from feeding import FeedPet
+from feeding import FeedPetAction
 import os
 from flask_cors import CORS
 import threading
+import re
 
 app = Flask(__name__)
 CORS(app)
 chatbot = Chatbot()  # Instantiate your Chatbot class
-feedpet = FeedPet()
+feedPetAction = FeedPetAction()
 
 # Define the path to the React build folder
 react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')
@@ -18,70 +19,58 @@ react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'bu
 @app.route('/')
 def index():
     return app.send_static_file(react_build_path + 'index.html')
+@app.route('/api/food', methods=['POST'])
+def generate_food_options():
 
+    answer = feedPetAction.get_food()
+    food_type = ["sweet", "savory", "rotten"]
+    food_names = re.findall(r'\[([^:]+):', answer)
+
+    food_pair = {}
+    for idx, food in enumerate(food_names):
+        pattern = r'\[([^\[\]]*?):]'
+        matches = re.findall(pattern, food)
+        food_pair[food] = food_type[idx]
+
+    print(food_pair)
+
+    # Extract key-value pairs using regular expression
+    pattern = r'\[([^\[\]]*?):\s*([^\[\]]*?)\]'
+    matches = re.findall(pattern, answer)
+
+    # Construct the dictionary
+    food_dict = {name.strip(): des.strip() for name, des in matches}
+
+    return jsonify({"food": food_dict, "food_type": food_pair})
 
 @app.route('/api/feed', methods=['POST'])
-def feed_pet():
-    # WIP
+def generate_feed_pet():
+
     data = request.json
-    print(data)
-    # prompt = data.get('description')
-        
-      # Set up your Helicone API key here
-    if "HELICONE_API_KEY" not in os.environ:
-        print("You didn't set your Helicone key to the HELICONE_API_KEY env var on the command line.")
-        os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
+    food_choice = data.get("food")
+    food_type = data.get("food_type")
+    hunger_level = data.get('hunger_level')
+    happiness_level = data.get('happiness_level')
+    likes_sweet = data.get('likes_sweet')
 
-    engine = OpenAIEngine(api_key=os.environ["HELICONE_API_KEY"], model="gpt-4", api_base="https://oai.hconeai.com/v1")
+    if hunger_level < 0:
+        answer = feedPetAction.pet_too_full()
 
-    pet = {
-        "identity": {
-            "name": "Hot Pot",
-            "physical_details": "A living kettle",
-        },
-        "personality": {
-        "cheerful": True,
-        "talkative": True,
-        "voice": 0,
-        "fav_color": "blue",
-        "competitive": True,
-        "likes_sweet": True,
-        "quickly_hungry": True,
-        # new field
-        "introversion": True,
-        # new field
-        "hobby": "hiking",
-        },
+    if food_type == "rotten":
+        hunger_level = hunger_level - 1
+        happiness_level = happiness_level - 2
+        answer = feedPetAction.feed_pet_rotten_food(food_choice)
+    elif (likes_sweet and food_type == "sweet") or (not likes_sweet and food_type == "savory"):
+        hunger_level = hunger_level - 2
+        happiness_level = happiness_level + 3
+        answer = feedPetAction.feed_pet_fav_food(food_choice)
+    else:
+        hunger_level = hunger_level - 2
+        happiness_level = happiness_level + 1
+        answer = feedPetAction.feed_pet_avg_food(food_choice)
 
-        "mood": {
-            "hunger_level": 0,
-            "happiness": 5,
-            "social_battery": 5,
-            "last_updated": timeStart
-        }
-    }
-    
-    FEED_PET_PROMPT = """
-    First, use the generate_food_sweet() method in FoodCreatorKani class to generate the name and description of a culturally popular sweet food. With this name and description, use the generate_food_sweet() function in the FoodCreatorKani class to create a food that is sweet and rotten is False.
-    Do not show the user the details of this generation.
-    Next, use generate_food_savory() method in the FoodCreatorKani class to generate the name and description of a culturally popular savory food. With this name and description, use the generate_food_savory() function in the FoodCreatorKani class to create a food that is savory and rotten is False.
-    Do not show the user the details of this generation.
-    Next, use generate_food_rotten() GPT to generate the name, sweet or savory, and description of a common rotten food. With this name and description, use the generate_food_rotten() function in the FoodCreatorKani class to create a food that rotten is True.
-    Do not show the user the details of this generation.
-    Next use the update_stats function within the UpdateStats class. Once done, find out the current
-    mood of the pet by accessing self.pet and getting the self.pet["mood"]["hunger"] and self.pet["mood"]["happiness"] stats.
-    Display the information of the food generated and ask the user which of these three foods the user would like to feed the pet.
-    Using the input of the user, use the feed_pet() function in the FeedPet class to update the information of the pet. Use the sweet, rotten, name, description of the food
-    chosen as inputs for the feed_pet() function. If the feed_pet() function returns False, the pet declined to eat
-    because the pet is not hungry. If the feed_pet() function returns True, the pet did not decline the food, but
-    might not have eaten if the food is rotten.
-    Create a description to describe the event. If a pet is fed rotten food, it would not eat and happiness goes down.
-    """
-    feed_pet_ai = FeedPet(engine, pet=pet, system_prompt=FEED_PET_PROMPT)
-    chat_in_terminal(feed_pet_ai, stopword="!stop", verbose=False)
-    # feed_pet_ai.save(f"feed_pet-{int(time.time())}.json")
+    return jsonify({"fed": answer, "happiness": happiness_level, "hunger": hunger_level})
 
-    print(pet)
 
 @app.route('/api/pet', methods=['POST'])
 def generate_meditation():

@@ -1,243 +1,247 @@
-# pet json
-import json
-import datetime
-import time
+import openai
 import os
+import pygame
+import random
+from dotenv import load_dotenv
 from getpass import getpass
-from d20 import roll
-from kani import Kani, ai_function, ChatMessage
-from kani import chat_in_terminal
-# Set up a GPT-4 engine using the Helicone proxy
-from kani.engines.openai import OpenAIEngine
 
-import dataclasses
-from dataclasses import dataclass
+class FeedPetAction:
+    def __init__(self, pet="default"):
+        self.key_path = "helicone_key.txt"
+        # self.load_helicone_key()
+        load_dotenv()
+        self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
+        self.memory = []
 
-class DiceKani(Kani):
-    @ai_function()
-    def roll(self, dice: str):
-        """
-        dice: Annotated[str, AIParam("what type of dice to roll for d20, e.g. 3d6kh2")]
-        """
-        roll_dice = roll(dice)
-        result = roll_dice.total
-        return result
+    # def load_helicone_key(self):
+    #     if "HELICONE_API_KEY" not in os.environ:
+    #         try:
+    #             with open(self.key_path, 'r') as file:
+    #                 os.environ["HELICONE_API_KEY"] = file.read()
+    #         except FileNotFoundError:
+    #             print(f"File not found: {self.key_path}")
+    #         except Exception as e:
+    #             print("You didn't set your Helicone key to the HELICONE_API_KEY env var on the command line.")
+    #             os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
+    #     return
 
-@dataclass
-class Food:
-    # structured food attributes
-    sweet: bool
-    rotten: bool
-    name: str
-
-    # LLM-generated
-    description: str = ""
-
-class FoodCreatorKani(DiceKani):
-
-    def __init__(self, *args, **kwargs):
-      super().__init__(*args, **kwargs)
-      self.food = dict()
-
-    @ai_function()
-    def generate_food_sweet(
-        self,
-        sweet: bool,
-        rotten: bool,
-        name: str,
-        description: str,
-    ):
-        """
-        This method will use the input parameters to create a new Food object. GPT
-        does not need to give any additional inputs as all required inputs are in the
-        function input arguments.
-        """
-        self.food[name] = Food(
-            sweet=sweet,
-            rotten=rotten,
-            name=name,
-            description=description,
-        )
-
-    @ai_function()
-    def generate_food_savory(
-        self,
-        sweet: bool,
-        rotten: bool,
-        name: str,
-        description: str,
-    ):
-        """
-        This method will use the input parameters to create a new Food object. GPT
-        does not need to give any additional inputs as all required inputs are in the
-        function input arguments.
-        """
-        self.food[name] = Food(
-            sweet=sweet,
-            rotten=rotten,
-            name=name,
-            description=description,
-        )
-
-    @ai_function()
-    def generate_food_rotten(
-        self,
-        sweet: bool,
-        rotten: bool,
-        name: str,
-        description: str,
-    ):
-        """
-        This method will use the input parameters to create a new Food object. GPT
-        does not need to give any additional inputs as all required inputs are in the
-        function input arguments.
-        """
-
-        self.food[name] = Food(
-            sweet=sweet,
-            rotten=rotten,
-            name=name,
-            description=description,
-        )
-
-# food_selection
-
-class UpdateStats(DiceKani):
-
-    def __init__(self, *args, pet: dict, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.pet = pet
-
-
-    @ai_function()
-    def update_stats(self):
-
-      """
-        This function updates the self.pet["mood"]["last_updated"] and self.pet["mood"]["hunger_level"] attributes.
-        It returns an array. The first item in the array (array[0]) represents the hunger_level
-        of the pet. The second item in the array (array[1]) represents the happiness level of the pet.
-      """
-
-      now = datetime.datetime.now()
-      last_updated = self.pet["mood"]["last_updated"]
-      last_updated_time = datetime.datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S.%f")
-
-      diff = now.minute - last_updated_time.minute
-
-      if self.pet["personality"]["quickly_hungry"]:
-        change_to_hunger = diff // 5
-      else:
-        change_to_hunger = diff // 10
-
-      self.pet["mood"]["hunger_level"] = self.pet["mood"]["hunger_level"] + change_to_hunger
-
-      if self.pet["personality"]["introversion"]:
-        self.pet["mood"]["social_battery"] = self.pet["mood"]["social_battery"] + (diff // 3)
-      else:
-        self.pet["mood"]["social_battery"] = self.pet["mood"]["social_battery"] - (diff // 3)
-
-      self.pet["mood"]["last_updated"] = str(now)
-
-      return [self.pet["mood"]["hunger_level"], self.pet["mood"]["happiness"], self.pet["mood"]["social_battery"]]
-
-
-class FeedPet(FoodCreatorKani, UpdateStats):
-    # This Kani should reference your mouse - let's pass it in the constructor.
-    def __init__(self, *args, pet: dict, **kwargs):
-        super().__init__(*args, pet=pet, **kwargs)
-        self.pet = pet
-
-    @ai_function()
-    def feed_pet(
-        self,
-        sweet: bool,
-        rotten: bool,
-        name: str,
-        description: str,
-    ):
-        """
-        This function accepts as input arguments hunger_fulfilled of the food, sweet of the food,
-        rotten of the food, name of the food, and description of the food. It first checks if the
-        pet's hunger level is more than zero. If it is not, it will feed the pet and update the hunger_level
-        and happiness level of the self.pet. The function returns a boolean which corresponds to whether
-        the pet was fed (True) or not (False). The self.pet object is also updated.
-        """
-
-        if self.pet["mood"]["hunger_level"] <= 0:
-          return False
-
-        if not rotten:
-          new_hunger_level = max(0, self.pet["mood"]["hunger_level"] - 2)
-          self.pet["mood"]["hunger_level"] = new_hunger_level
-          if self.pet["personality"]["likes_sweet"] and sweet:
-            self.pet["mood"]["happiness"] = self.pet["mood"]["happiness"] + 2
-          elif not self.pet["personality"]["likes_sweet"] and not sweet:
-            self.pet["mood"]["happiness"] = self.pet["mood"]["happiness"] + 2
-          else:
-            self.pet["mood"]["happiness"] = self.pet["mood"]["happiness"] + 1
-
+    def load_personality(self):
+        if self.pet == "default":
+            personality = """You are a friendly tamagochi-like pet."""
         else:
-          self.pet["mood"]["happiness"] = self.pet["mood"]["happiness"] - 1
+            personality = f"""Your hunger level is {self.pet.mood.hunger_level}.
+            Your current happiness level is : {self.pet.mood.happiness}.
+            You like food that is sweet: {self.pet.personality.likes_sweet}.
+            You like food that is savory: {not self.pet.personality.likes_sweet}.
+            """
 
-        return True
+        self.memory.append({"role": "system", "content": personality})
+
+    def answer(self, prompt, ver="gpt-4-1106-preview"):
+        self.memory.append({"role": "user", "content": prompt})
+        completion = self.client.chat.completions.create(
+            model=ver,
+            messages=self.memory
+        )
+        return completion.choices[0].message.content
+
+    def get_food(self):
+        response = self.client.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+            {
+              "role": "system",
+              "content": "Generate the name: description of three foods and arrange them in an array. The first item in the array should be a culturally popular sweet food. The second item in the array should be a culturally popular savory food. The third item in the array should be a common rotten food."
+            },
+            {
+              "role": "user",
+              "content": "feed pet"
+            },
+            {
+              "role": "assistant",
+              "content": "[Chocolate Cake: A moist, rich chocolate cake with a layer of creamy chocolate frosting] [Chicken Biryani: A flavorful, aromatic Indian dish made with chicken, basmati rice, and a blend of spices], [Rancid Meat: An old piece of meat that has a horrific smell and is infested with maggots]"
+            }, 
+            {
+            "role": "assistant",
+            "content": "[Caramel Cake: A sweet food item made from caramelised sugar and rich cake dough] [Venison Stew: A savory, hearty food item comprised of game meat, vegetables, and hearty broth] [Spoiled Apple Pie: The apple pie was left improperly stored and has turned bad]"
+            },
+             
+            {
+            "role": "assistant",
+            "content": "[Chocolate Truffles: A popular sweet treat made from rich, creamy chocolate ganache coated in cocoa powder or chopped nuts. Indulge in the smooth and decadent taste of these bite-sized delights] [Samosas: A savory snack originating from the Indian subcontinent, consisting of a triangular pastry shell filled with spiced potatoes, peas, and sometimes minced meat. Enjoy the crispy exterior and flavorful filling of these delicious hand-held snacks] [Moldy Bread: Once a staple food, this loaf of bread has unfortunately been left out for too long, developing a fuzzy layer of green and white mold. Full of spores and an unpleasant odor, this food is best discarded]"
+            }
+          ],
+          temperature=1,
+          max_tokens=256,
+          top_p=1,
+          frequency_penalty=0,
+          presence_penalty=0
+        )
+        print(response.choices[0].message.content)
+        return response.choices[0].message.content
+  
+
+    def feed_pet_fav_food(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"You feed your pet {food_choice}, which happens to be their favorite type of food. Describe how the pet feels after eating. Imagine all foods are edible."
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "Yum! This food tastes really good!"
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have been craving for food since this morning! Thank you!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
     
 
 
+    def feed_pet_avg_food(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"You feed your pet {food_choice}, which happens to be a food they are not thrilled with by are alright with. Describe how the pet feels after eating. Imagine all foods are edible."
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "Yum! This food tastes really good!"
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have been craving for food since this morning! Thank you!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
+
+
+    def feed_pet_rotten_food(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"You feed your pet {food_choice}, which happens to be a rotten food. Describe how the pet feels after eating. Imagine all foods are edible."
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "Yum! This food tastes really good!"
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have been craving for food since this morning! Thank you!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
+
+    def pet_too_full(self, food_choice):
+      
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": f"Your owner is trying to feed you {food_choice} You are a pet that feels way too full. Describe how you feel and the fact that you would rather not eat. "
+          },
+          {
+            "role": "user",
+            "content": f"{food_choice}"
+          },
+          {
+            "role": "assistant",
+            "content": "No thank you, I've had enough food for now. Thank you for thinking of me."
+          }, 
+          {
+          "role": "assistant",
+          "content": "I have had too much to eat today!"
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      # with open(feed_pet_file_path, 'wb') as f:
+      #     f.write(response.choices[0].message.content)
+      print(response.choices[0].message.content)
+      return response.choices[0].message.content
+
+    def amnesia(self):
+        self.memory.pop()
+        self.load_personality()
+        return
+    
+    def run_once(self):
+        prompt = input("Enter prompt:\n")
+        answer = self.answer(prompt)
+        speech_file_path = self.text_to_audio(answer)
+        self.speak(speech_file_path)
+    
+    def run(self):
+        while True:
+            get_food_file_path = self.get_food()
+            prompt = input("Enter prompt (-1 to exit):\n")
+            if prompt.lower() in ["quit", "exit", "-1"]:
+                return
+            answer = self.answer(prompt)
+            feed_pet_reply_file_path = self.feed_pet(answer)
+            
 
 if __name__ == '__main__':
+    feedPetAction = FeedPetAction()
+    feedPetAction.run()
 
-  # Set up your Helicone API key here
-  if "HELICONE_API_KEY" not in os.environ:
-      print("You didn't set your Helicone key to the HELICONE_API_KEY env var on the command line.")
-      os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
-
-  engine = OpenAIEngine(api_key=os.environ["HELICONE_API_KEY"], model="gpt-4", api_base="https://oai.hconeai.com/v1")
-
-  pet = {
-    "identity": {
-        "name": "Hot Pot",
-        "physical_details": "A living kettle",
-    },
-    "personality": {
-      "cheerful": True,
-      "talkative": True,
-      "voice": 0,
-      "fav_color": "blue",
-      "competitive": True,
-      "likes_sweet": True,
-      "quickly_hungry": True,
-      # new field
-      "introversion": True,
-      # new field
-      "hobby": "hiking",
-    },
-
-    "mood": {
-        "hunger_level": 0,
-        "happiness": 5,
-        "social_battery": 5,
-        "last_updated": timeStart
-    }
-  }
-  
-  FEED_PET_PROMPT = """
-  First, use the generate_food_sweet() method in FoodCreatorKani class to generate the name and description of a culturally popular sweet food. With this name and description, use the generate_food_sweet() function in the FoodCreatorKani class to create a food that is sweet and rotten is False.
-  Do not show the user the details of this generation.
-  Next, use generate_food_savory() method in the FoodCreatorKani class to generate the name and description of a culturally popular savory food. With this name and description, use the generate_food_savory() function in the FoodCreatorKani class to create a food that is savory and rotten is False.
-  Do not show the user the details of this generation.
-  Next, use generate_food_rotten() GPT to generate the name, sweet or savory, and description of a common rotten food. With this name and description, use the generate_food_rotten() function in the FoodCreatorKani class to create a food that rotten is True.
-  Do not show the user the details of this generation.
-  Next use the update_stats function within the UpdateStats class. Once done, find out the current
-  mood of the pet by accessing self.pet and getting the self.pet["mood"]["hunger"] and self.pet["mood"]["happiness"] stats.
-  Display the information of the food generated and ask the user which of these three foods the user would like to feed the pet.
-  Using the input of the user, use the feed_pet() function in the FeedPet class to update the information of the pet. Use the sweet, rotten, name, description of the food
-  chosen as inputs for the feed_pet() function. If the feed_pet() function returns False, the pet declined to eat
-  because the pet is not hungry. If the feed_pet() function returns True, the pet did not decline the food, but
-  might not have eaten if the food is rotten.
-  Create a description to describe the event. If a pet is fed rotten food, it would not eat and happiness goes down.
-  """
-  feed_pet_ai = FeedPet(engine, pet=pet, system_prompt=FEED_PET_PROMPT)
-  chat_in_terminal(feed_pet_ai, stopword="!stop", verbose=False)
-  # feed_pet_ai.save(f"feed_pet-{int(time.time())}.json")
-
-  print(pet)
