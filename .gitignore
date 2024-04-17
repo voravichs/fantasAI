@@ -13,7 +13,8 @@
 # Ignore any other temporary or generated files
 .DS_Store
 .env
+/scripts/__pycache__
 
 # Ignore helicone_key.txt
-/backend/helicone_key.txt
+/scripts/helicone_key.txt
 
