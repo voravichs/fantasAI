@@ -1,8 +1,6 @@
 /* App.css */
 /* Reset default browser styles */
 body, h1, h2, p, label, input, select, textarea, button {
-    margin: 0;
-    padding: 0px;
     font-family: Arial, sans-serif;
   }
   
@@ -10,7 +8,6 @@ body, h1, h2, p, label, input, select, textarea, button {
   body {
     background-color: #1a1a1a; /* Dark background */
     color: #fff; /* Light text */
-    text-align: center; /* Center align all text */
   }
   
   p {
@@ -21,15 +18,6 @@ body, h1, h2, p, label, input, select, textarea, button {
     margin-bottom: 0px; /* Adjust margin-bottom as needed */
   }
   
-  .container {
-    max-width: 800px;
-    margin: 0 auto; /* Center the container */
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
   
   header {
     background-color: #ba69a6; /* Light muted magenta for header background */
@@ -43,8 +31,12 @@ body, h1, h2, p, label, input, select, textarea, button {
   }
   
   main {
-    padding: 20px 0;
+    padding: 5px;
     width: 100%;
+    border:solid;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
   }
   
   input[type="number"],
@@ -116,18 +108,9 @@ body, h1, h2, p, label, input, select, textarea, button {
   .label-row label {
     margin-right: 10px;
   }
-  
-  .voice-dropdown {
-    width: 80px; /* Adjust width as needed */
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    margin-bottom: 4px; /* Increase margin-bottom for spacing */
-  }
-  
+
   /* New styles for user and pet text boxes */
-  .message.user {
+  .message.narration {
     background-color: #4d5c7a; /* Mild teal tone for user text boxes */
     padding: 8px;
     border-radius: 8px;
@@ -142,14 +125,15 @@ body, h1, h2, p, label, input, select, textarea, button {
   }
   
   .pet-image {
-    margin-bottom: 16px; /* Increase margin-bottom for spacing */
+    margin-bottom: 20px; /* Increase margin-bottom for spacing */
+    width: 100px;
+    text-align: center;
   }
 
   .food-box {
     border-radius: 2px;
     background-color: #ffffff;
     color: black;
-    width: 200px;
     margin: 20px;
     padding: 10px;
 
@@ -159,4 +143,30 @@ body, h1, h2, p, label, input, select, textarea, button {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
+  }
+
+
+  .column-div{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    
+  }
+
+  .left-column{
+    top: 300px;
+    margin: 20px;
+    width: 40%;
+    border: solid;
+    align-items: center;
+    text-align: center;
+  }
+
+  .right-column{
+    
+    top: 300px;
+    margin: 20px;
+    width: 40%;
+    border: solid;
   }

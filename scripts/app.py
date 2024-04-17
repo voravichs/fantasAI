@@ -19,6 +19,7 @@ react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'bu
 @app.route('/')
 def index():
     return app.send_static_file(react_build_path + 'index.html')
+
 @app.route('/api/food', methods=['POST'])
 def generate_food_options():
 
@@ -32,8 +33,6 @@ def generate_food_options():
         matches = re.findall(pattern, food)
         food_pair[food] = food_type[idx]
 
-    print(food_pair)
-
     # Extract key-value pairs using regular expression
     pattern = r'\[([^\[\]]*?):\s*([^\[\]]*?)\]'
     matches = re.findall(pattern, answer)
@@ -41,7 +40,9 @@ def generate_food_options():
     # Construct the dictionary
     food_dict = {name.strip(): des.strip() for name, des in matches}
 
-    return jsonify({"food": food_dict, "food_type": food_pair})
+    narration = feedPetAction.open_fridge()
+
+    return jsonify({"food": food_dict, "food_type": food_pair, "narration": narration})
 
 @app.route('/api/feed', methods=['POST'])
 def generate_feed_pet():
@@ -52,24 +53,33 @@ def generate_feed_pet():
     hunger_level = data.get('hunger_level')
     happiness_level = data.get('happiness_level')
     likes_sweet = data.get('likes_sweet')
+    cheerful = data.get('cheerful')
+    talkative = data.get('talkative')
 
     if hunger_level < 0:
-        answer = feedPetAction.pet_too_full()
+        describe = feedPetAction.pet_too_full(food_choice)
+        pet_answer = feedPetAction.pet_answer("full", False, food_choice, talkative, cheerful)
 
     if food_type == "rotten":
         hunger_level = hunger_level - 1
         happiness_level = happiness_level - 2
-        answer = feedPetAction.feed_pet_rotten_food(food_choice)
+        describe = feedPetAction.feed_pet_rotten_food(food_choice)
+        # nature of conversation, fav_food, food_choice, talkative, cheerful
+        pet_answer = feedPetAction.pet_answer("rotten", False, food_choice, talkative, cheerful)
     elif (likes_sweet and food_type == "sweet") or (not likes_sweet and food_type == "savory"):
         hunger_level = hunger_level - 2
         happiness_level = happiness_level + 3
-        answer = feedPetAction.feed_pet_fav_food(food_choice)
+        describe = feedPetAction.feed_pet_fav_food(food_choice)
+        # nature of conversation, fav_food, food_choice, talkative, cheerful
+        pet_answer = feedPetAction.pet_answer("thank", True, food_choice, talkative, cheerful)
     else:
         hunger_level = hunger_level - 2
         happiness_level = happiness_level + 1
-        answer = feedPetAction.feed_pet_avg_food(food_choice)
+        describe = feedPetAction.feed_pet_avg_food(food_choice)
+        # nature of conversation, fav_food, food_choice, talkative, cheerful
+        pet_answer = feedPetAction.pet_answer("thank", False, food_choice, talkative, cheerful)
 
-    return jsonify({"fed": answer, "happiness": happiness_level, "hunger": hunger_level})
+    return jsonify({"describe": describe, "pet_answer": pet_answer, "happiness": happiness_level, "hunger": hunger_level})
 
 
 @app.route('/api/pet', methods=['POST'])

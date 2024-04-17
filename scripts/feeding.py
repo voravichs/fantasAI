@@ -45,6 +45,38 @@ class FeedPetAction:
         )
         return completion.choices[0].message.content
 
+    def open_fridge(self):
+        response = self.client.chat.completions.create(
+          model="gpt-3.5-turbo",
+          messages=[
+            {
+              "role": "system",
+              "content": f"Generate a narration that a fridge was opened"
+            },
+            {
+              "role": "user",
+              "content": "open fridge"
+            },
+            {
+              "role": "assistant",
+              "content": "You open the fridge and was surprised to find exciting items."
+            }, 
+            {
+            "role": "assistant",
+            "content": "You skipped towards the fridge and with a strong pull opened the door to find new possibilties"
+            }
+          ],
+          temperature=1,
+          max_tokens=256,
+          top_p=1,
+          frequency_penalty=0,
+          presence_penalty=0
+        )
+        print(response.choices[0].message.content)
+        return response.choices[0].message.content
+  
+
+
     def get_food(self):
         response = self.client.chat.completions.create(
           model="gpt-3.5-turbo",
@@ -88,7 +120,7 @@ class FeedPetAction:
         messages=[
           {
             "role": "system",
-            "content": f"You feed your pet {food_choice}, which happens to be their favorite type of food. Describe how the pet feels after eating. Imagine all foods are edible."
+            "content": f"You feed your pet {food_choice}, which happens to be their favorite type of food. Describe the scene. Imagine all foods are edible."
           },
           {
             "role": "user",
@@ -124,7 +156,7 @@ class FeedPetAction:
         messages=[
           {
             "role": "system",
-            "content": f"You feed your pet {food_choice}, which happens to be a food they are not thrilled with by are alright with. Describe how the pet feels after eating. Imagine all foods are edible."
+            "content": f"You feed your pet {food_choice}, which happens to be a food they are not thrilled with by are alright with. Describe the scene. Imagine all foods are edible."
           },
           {
             "role": "user",
@@ -151,6 +183,52 @@ class FeedPetAction:
       print(response.choices[0].message.content)
       return response.choices[0].message.content
 
+    def pet_answer(self, nature, fav_food, food_choice, talkative, cheerful):
+          
+          if talkative:
+            max_tokens = 300
+          else:
+            max_tokens = 100
+
+          pet_personality = f"You are a talking pet. Your replies are around {max_tokens} number of words. You are generally cheerful: {cheerful}."
+
+          if nature == "full":
+            content = pet_personality + f" You are too full to eat so you rejected your owner's {food_choice}. Reply in pet language in first-person converstion style."
+          elif nature == "thank":
+            content = pet_personality + f" Your owner fed you {food_choice} and you ate it. It is your favorite food: it {fav_food}. Thank your owner in pet language in first-person converstion style."
+          elif nature == "rotten":
+            content = pet_personality + f" Your owner fed you {food_choice} and you ate it. It is rotten food. You reply that you ate it but are angry in pet language in first-person converstion style."
+
+          response = self.client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+              {
+                "role": "system",
+                "content": content
+              },
+              {
+                "role": "user",
+                "content": f"{food_choice}"
+              },
+              {
+                "role": "assistant",
+                "content": "Yum! This food tastes really good!"
+              }, 
+              {
+              "role": "assistant",
+              "content": "I have been craving for food since this morning! Thank you!"
+              }
+            ],
+            temperature=1,
+            max_tokens=max_tokens,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+          )
+
+          return response.choices[0].message.content
+
+
 
     def feed_pet_rotten_food(self, food_choice):
       
@@ -159,7 +237,7 @@ class FeedPetAction:
         messages=[
           {
             "role": "system",
-            "content": f"You feed your pet {food_choice}, which happens to be a rotten food. Describe how the pet feels after eating. Imagine all foods are edible."
+            "content": f"You feed your pet {food_choice}, which happens to be a rotten food. Describe the scene. Imagine all foods are edible."
           },
           {
             "role": "user",
@@ -193,7 +271,7 @@ class FeedPetAction:
         messages=[
           {
             "role": "system",
-            "content": f"Your owner is trying to feed you {food_choice} You are a pet that feels way too full. Describe how you feel and the fact that you would rather not eat. "
+            "content": f"Your owner is trying to feed you {food_choice}. You are a pet that feels way too full so you decide not to eat. Describe how you decline in first person language. "
           },
           {
             "role": "user",

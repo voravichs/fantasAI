@@ -1,7 +1,18 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { useEffect, useState} from 'react';
+import { useGlobalState } from '../PetClass';
 
 export default function HomePage() {
+
+    const {name, setName,
+        cheerful, setCheerful,
+        talkative, setTalkative,
+        quicklyHungry, setQuicklyHungry,
+        happiness, setHappiness, 
+        hunger, setHunger, 
+        likesSweet, setLikesSweet} = useGlobalState();
+
     const container = {
         hidden: { opacity: 0 },
         show: {
@@ -22,6 +33,7 @@ export default function HomePage() {
         hidden: { scale: 0, top: 100 },
         show: { scale: [0, 1.1, 1], top: [100,  30, 30] },
     }
+
 
     return (
         <>
@@ -46,11 +58,15 @@ export default function HomePage() {
                         <button className="text-4xl py-4 px-8">Chat</button>
                     </Link>
                     <Link href="/feeding">
-                        <button className="text-4xl py-4 px-8">Feeding</button>
+                        <button className="text-4xl py-4 px-8">Feeding </button>
                     </Link>
                     <Link href="/petgen">
                         <button className="text-4xl py-4 px-8">PetGen</button>
                     </Link>
+                </div>
+
+                <div>
+                    {hunger > 10 ? "Pet feeling hungry" : ""}
                 </div>
                 
             </div>
