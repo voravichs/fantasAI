@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './Feeding.css'; // Import your CSS file
-import Modal from 'react-modal'; // Import Modal from react-modal library
-import { useGlobalState } from '../PetClass';
+import { useGlobalState } from '../../PetClass';
 
-function Feeding() {
+export default function Feeding() {
     
     const {hunger, setHunger, happiness, setHappiness, likesSweet, setLikesSweet} = useGlobalState();
 
@@ -131,6 +130,3 @@ function Feeding() {
         </div>
     );
 }
-
-export default Feeding;
-
