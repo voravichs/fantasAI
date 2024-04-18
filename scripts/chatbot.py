@@ -8,7 +8,7 @@ from getpass import getpass
 class Chatbot:
     def __init__(self, pet="default"):
         self.pet = pet
-        self.pick_voice()
+        self.pick_random_voice()
         load_dotenv()
         self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
         self.memory = []
@@ -32,12 +32,19 @@ class Chatbot:
         )
         return completion.choices[0].message.content
     
-    def pick_voice(self):
+    def pick_random_voice(self):
         # Randomly pick from the 6 voices
         roll = random.randint(0, 5)
         voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
         self.voice = voices[roll]
         return self.voice
+    
+    def pick_voice(self, choice):
+        choice = choice.lower()
+        voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+        if choice in voices:
+            self.voice = choice
+        return choice
 
     def text_to_audio(self, text, language="en"):
         voice = self.voice
