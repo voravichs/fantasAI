@@ -33,6 +33,7 @@ class Chatbot:
         return completion.choices[0].message.content
     
     def pick_voice(self):
+        # Randomly pick from the 6 voices
         roll = random.randint(0, 5)
         voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
         self.voice = voices[roll]
