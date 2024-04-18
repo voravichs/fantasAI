@@ -8,25 +8,11 @@ from getpass import getpass
 class Chatbot:
     def __init__(self, pet="default"):
         self.pet = pet
-        self.voice = "random"
-        self.key_path = "helicone_key.txt"
-        # self.load_helicone_key()
+        self.pick_random_voice()
         load_dotenv()
         self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
         self.memory = []
         self.load_personality()
-
-    # def load_helicone_key(self):
-    #     if "HELICONE_API_KEY" not in os.environ:
-    #         try:
-    #             with open(self.key_path, 'r') as file:
-    #                 os.environ["HELICONE_API_KEY"] = file.read()
-    #         except FileNotFoundError:
-    #             print(f"File not found: {self.key_path}")
-    #         except Exception as e:
-    #             print("You didn't set your Helicone key to the HELICONE_API_KEY env var on the command line.")
-    #             os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
-    #     return
 
     def load_personality(self):
         if self.pet == "default":
@@ -45,13 +31,23 @@ class Chatbot:
             messages=self.memory
         )
         return completion.choices[0].message.content
+    
+    def pick_random_voice(self):
+        # Randomly pick from the 6 voices
+        roll = random.randint(0, 5)
+        voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+        self.voice = voices[roll]
+        return self.voice
+    
+    def pick_voice(self, choice):
+        choice = choice.lower()
+        voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+        if choice in voices:
+            self.voice = choice
+        return choice
 
     def text_to_audio(self, text, language="en"):
         voice = self.voice
-        if voice == "random":
-            roll = random.randint(0, 5)
-            voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
-            voice = voices[roll]
 
         speech_file_path = os.path.join(os.path.dirname(__file__), "audio", "speech.mp3")
         response = self.client.audio.speech.create(
