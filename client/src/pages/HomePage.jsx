@@ -63,6 +63,9 @@ export default function HomePage() {
                     <Link href="/petgen">
                         <button className="text-4xl py-4 px-8">PetGen</button>
                     </Link>
+                    <Link href="/game">
+                        <button className="text-4xl py-4 px-8">Games</button>
+                    </Link>
                 </div>
 
                 <div>

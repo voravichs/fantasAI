@@ -3,11 +3,17 @@ import Chat from "./Chat/Chat"
 import PetGen from "./PetGen/PetGen"
 import HomePage from "./HomePage"
 import NoPage from "./NoPage"
+import Game from "./Game/Game"
+import TTT from "./Game/TTT"
+import Connect4 from "./Game/Connect4"
 
 export {
     Feeding,
     Chat,
     PetGen,
     HomePage,
-    NoPage
+    NoPage,
+    Game,
+    TTT,
+    Connect4
 }
