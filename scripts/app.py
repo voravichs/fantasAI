@@ -2,15 +2,21 @@
 from flask import Flask, jsonify, request
 from chatbot import Chatbot
 from feeding import FeedPetAction
+from games import TicTacToe
+from games import ConnectFour
 import os
 from flask_cors import CORS
 import threading
 import re
+import math
+import random
 
 app = Flask(__name__)
 CORS(app)
 chatbot = Chatbot()  # Instantiate your Chatbot class
 feedPetAction = FeedPetAction()
+ttt = TicTacToe([[0,0,0], [0,0,0], [0,0,0]], True)
+connect4 = ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]], True)
 
 # Define the path to the React build folder
 react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')
@@ -19,6 +25,113 @@ react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'bu
 @app.route('/')
 def index():
     return app.send_static_file(react_build_path + 'index.html')
+
+@app.route('/api/new_ttt', methods=['POST'])
+def new_ttt():
+    ttt.reset()
+    return jsonify({"board" : ttt.get_board()})
+
+@app.route('/api/new_c4', methods=['POST'])
+def new_c4():
+    connect4.reset()
+    return jsonify({"board" : connect4.get_board()})  
+
+@app.route('/api/get_ttt', methods=['POST'])
+def get_ttt():
+    return jsonify({"board" : ttt.get_board()})
+
+@app.route('/api/move_ttt', methods=['POST'])
+def move_ttt():
+    if ttt.has_winner():
+        response = ttt.talk("The game is already over! Press the button to start a new game!")
+        return jsonify({"board" : ttt.get_board(), "response" : response})
+    
+    data = request.json
+    move = ttt.get_space(data.get("move"))
+        
+    response = ""
+
+    if move.isnumeric():
+        if -1<int(move)<9:
+            row = math.floor(int(move) / 3)
+            col = int(move) % 3
+            if ttt.is_legal_move(row, col):
+                ttt.perform_move(row, col, 1)
+                
+                if not ttt.game_over():
+                    move = ttt.get_random_move()
+                    # TODO: Figure out why the get the best move is stalling infinitely
+                    '''
+                    if ttt.get_attributes()[0]:
+                        move = ttt.get_best_move(-1)[0]
+                        if random.random() > 0.8 or move == None:
+                            move = ttt.get_random_move()
+                    else:
+                        move = ttt.get_random_move()
+                    '''
+                    ttt.perform_move(move[0], move[1], -1)
+                
+                if ttt.has_winner() == 1:
+                    response = ttt.talk('The game is over! You won!')
+                elif ttt.has_winner() == -1:
+                    response = ttt.talk('The game is over! I won!')
+                else:
+                    response = ttt.talk('Nice Move! I made a move as well!')
+        
+            else:
+                response = ttt.talk("You can't make that move. Choose a different one!")
+        else:
+            response = ttt.talk("That isn't a valid number. Choose a different one!")
+    else:
+        response = ttt.talk("That isn't a number. Choose a different one!")
+
+    return jsonify({"board" : ttt.get_board(), "response" : response})
+
+
+@app.route('/api/move_c4', methods=['POST'])
+def move_c4():
+    if connect4.has_winner():
+        response = connect4.talk("The game is already over! Press the button to start a new game!")
+        return jsonify({"board" : connect4.get_board(), "response" : response})
+    
+    data = request.json
+    move = connect4.get_space(data.get("move"))
+        
+    response = ""
+    if move.isnumeric():
+        if -1<int(move)<7:
+            if connect4.is_legal_move(int(move)):
+                connect4.perform_move(int(move), 1)
+                
+                if not connect4.game_over():
+                    move = connect4.get_random_move()
+                    # TODO: Figure out why the get the best move is stalling infinitely
+                    '''
+                    if connect4.get_attributes()[0]:
+                        move = connect4.get_best_move(-1)[0]
+                        if random.random() > 0.8 or move == None:
+                            move = connect4.get_random_move()
+                    else:
+                        move = connect4.get_random_move()
+                    '''
+                    connect4.perform_move(int(move), -1)
+                
+                if connect4.has_winner() == 1:
+                    response = connect4.talk('The game is over! You won!')
+                elif connect4.has_winner() == -1:
+                    response = connect4.talk('The game is over! I won!')
+                else:
+                    response = connect4.talk('Nice Move! I made a move as well!')
+        
+            else:
+                response = connect4.talk("You can't make that move. Choose a different one!")
+        else:
+            response = connect4.talk("That isn't a valid number. Choose a different one!")
+    else:
+        response = connect4.talk("That isn't a number. Choose a different one!")
+
+    return jsonify({"board" : connect4.get_board(), "response" : response})
+
 
 @app.route('/api/food', methods=['POST'])
 def generate_food_options():

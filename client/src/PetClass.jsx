@@ -11,6 +11,7 @@ export const PetClass = ({ children }) => {
 
   const [name, setName] = useState("");
   
+  const [competitive, setCompetitive] = useState(false);
   const [cheerful, setCheerful] = useState(true);
   const [talkative, setTalkative] = useState(true);
   
@@ -36,6 +37,7 @@ export const PetClass = ({ children }) => {
   return (
     <GlobalStateContext.Provider value={{ 
       name, setName,
+      competitive, setCompetitive,
       cheerful, setCheerful,
       talkative, setTalkative,
       quicklyHungry, setQuicklyHungry,

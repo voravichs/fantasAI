@@ -8,22 +8,20 @@ import openai
 from openai import OpenAI
 
 class Game():
-  def __init__(self, cheerful, talkative, competitive):
-    self.cheerful = cheerful
-    self.talkative = talkative
+  def __init__(self, competitive):
     self.competitive = competitive
     self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
 
   def get_attributes(self):
-    return (self.cheerful, self.talkative, self.competitive)
+    return [self.competitive]
 
   def talk(self, context):
-    print(context)
+    return context
 
 class TicTacToe(Game):
 
-    def __init__(self, board, cheerful, talkative, competitive):
-      super().__init__(cheerful, talkative, competitive)
+    def __init__(self, board, competitive):
+      super().__init__(competitive)
       self.board = board
       self.wins = [[(0,0),(0,1),(0,2)], [(1,0),(1,1),(1,2)], [(2,0),(2,1),(2,2)],
                   [(0,0),(1,0),(2,0)], [(0,1),(1,1),(2,1)], [(0,2),(1,2),(2,2)],
@@ -72,7 +70,7 @@ class TicTacToe(Game):
       return self.has_winner() != 0 or len(list(self.legal_moves())) == 0
 
     def copy(self):
-        return TicTacToe([[col for col in row] for row in self.get_board()], self.cheerful, self.talkative, self.competitive)
+        return TicTacToe([[col for col in row] for row in self.get_board()], self.competitive)
 
     def successors(self, player):
         for move in self.legal_moves():
@@ -126,7 +124,7 @@ class TicTacToe(Game):
         return self.alpha_beta_max(player,-math.inf, math.inf)
 
     def get_space(self, space_str):
-      response = client.chat.completions.create(
+      response = self.client.chat.completions.create(
         model="gpt-4",
         messages=[
           {
@@ -157,8 +155,8 @@ class TicTacToe(Game):
 
 class ConnectFour(Game):
 
-    def __init__(self, board, cheerful, talkative, competitive):
-      super().__init__(cheerful, talkative, competitive)
+    def __init__(self, board, competitive):
+      super().__init__(competitive)
       self.board = board
 
     def __str__(self):
@@ -224,7 +222,7 @@ class ConnectFour(Game):
       return self.has_winner() != 0 or len(list(self.legal_moves())) == 0
 
     def copy(self):
-        return ConnectFour([[col for col in row] for row in self.get_board()], self.cheerful, self.talkative, self.competitive)
+        return ConnectFour([[col for col in row] for row in self.get_board()], self.competitive)
 
     def successors(self, player):
         for move in self.legal_moves():
@@ -281,7 +279,7 @@ class ConnectFour(Game):
         return self.alpha_beta_max(player, limit, -math.inf, math.inf)
 
     def get_space(self, space_str):
-      response = client.chat.completions.create(
+      response = self.client.chat.completions.create(
         model="gpt-4",
         messages=[
           {
@@ -310,14 +308,14 @@ class ConnectFour(Game):
 
       return response.choices[0].message.content
 
-def create_tictactoe_game(cheerful, talkative, competitive):
-    return TicTacToe([[0,0,0], [0,0,0], [0,0,0]], cheerful, talkative, competitive)
+def create_tictactoe_game(competitive):
+    return TicTacToe([[0,0,0], [0,0,0], [0,0,0]], competitive)
 
-def create_connectfour_game(cheerful, talkative, competitive):
-    return ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]], cheerful, talkative, competitive)
+def create_connectfour_game(competitive):
+    return ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]], competitive)
 
-def playTicTacToe(cheerful, talkative, competitive):
-  game = create_tictactoe_game(cheerful, talkative, competitive)
+def playTicTacToe(competitive):
+  game = create_tictactoe_game(competitive)
 
   game.talk("Time to start playing. You are X's, I am O's. You go first!")
   player = 1
@@ -364,8 +362,8 @@ def playTicTacToe(cheerful, talkative, competitive):
   game.talk('The game is over! ' + winner + " won!")
   game.talk('The final board looks like this:\n' + str(game))
 
-def playConnectFour(cheerful, talkative, competitive):
-  game = create_connectfour_game(True, True, True)
+def playConnectFour(competitive):
+  game = create_connectfour_game(competitive)
 
   game.talk("Time to start playing. You are X's, I am O's. You go first!")
   player = 1
