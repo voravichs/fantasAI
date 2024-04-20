@@ -81,47 +81,44 @@ class TicTacToe(Game):
     def get_random_move(self):
         return random.choice(list(self.legal_moves()))
 
-    def alpha_beta_max(self, player, alpha, beta):
+    def get_llm_move(self, board_str):
+      response = self.client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+          {
+            "role": "system",
+            "content": '''
+            You are playing a game of Tic Tac Toe. Your goal is to state the best move given a board in the form of a 3x3 array.
+            Spaces you own are notated as -1, spaces your opponent owns are notated as 1, empty spaces are 0. The space you will
+            make a move on must be an empty space listed as a 0.
+            To describe your move, you will return a number from 0 to 8 inclusive that relates to the space you are talking about. 
+            0 is the top left and the number increases going from left to right then down.
+            '''
+          },
+          {
+            "role": "user",
+            "content": "[[1,1,-1], [0,1,-1], [0,0,0]]"
+          },
+          {
+            "role": "assistant",
+            "content": "8"
+          },
+          {
+            "role": "user",
+            "content": board_str
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
 
-        if self.game_over():
-            curr_val = len(list(self.legal_moves()))
-            return None, curr_val, 1
+      return response.choices[0].message.content
 
-        curr_val = -math.inf
-        curr_leaves = 0
-        curr_move = None
-
-        for next_move, next_board in self.successors(player):
-            best_move, best_val, total_leaves = next_board.alpha_beta_min(player * -1, alpha, beta)
-            curr_leaves += total_leaves
-            if best_val > curr_val:
-                curr_val, curr_move = best_val, next_move
-                alpha = max(alpha, curr_val)
-            if curr_val >= beta:
-                return curr_move, curr_val, curr_leaves
-        return curr_move, curr_val, curr_leaves
-
-    def alpha_beta_min(self, player, alpha, beta):
-        if self.game_over():
-            curr_val = len(list(self.legal_moves()))
-            return None, curr_val, 1
-
-        curr_val = math.inf
-        curr_leaves = 0
-        curr_move = None
-
-        for next_move, next_board in self.successors(player):
-            best_move, best_val, total_leaves = next_board.alpha_beta_max(player * -1, alpha, beta)
-            curr_leaves += total_leaves
-            if best_val < curr_val:
-                curr_val, curr_move = best_val, next_move
-                beta = min(beta, curr_val)
-            if curr_val <= alpha:
-                return curr_move, curr_val, curr_leaves
-        return curr_move, curr_val, curr_leaves
-
-    def get_best_move(self, player):
-        return self.alpha_beta_max(player,-math.inf, math.inf)
+    def get_best_move(self):
+      return self.get_llm_move(str(self.get_board()))
 
     def get_space(self, space_str):
       response = self.client.chat.completions.create(
@@ -232,51 +229,54 @@ class ConnectFour(Game):
 
     def get_random_move(self):
         return random.choice(list(self.legal_moves()))
+    
+    def get_llm_move(self, board_str):
+      response = self.client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+          {
+            "role": "system",
+            "content": '''
+            You are playing a game of Connect 4. Your goal is to state the best move given a board in the form of a 6x7 array.
+            Spaces you own are notated as -1, spaces your opponent owns are notated as 1, empty spaces are 0. The column you will
+            make a move on must be a column with a 0 at some point in the column.
+            The goal of the game is to get 4 of your pieces in a row while preventing your opponent from getting four in a row of their own. 
+            To describe your move, you will return a number from 0 to 6 inclusive that relates to the column you are talking about.
+            0 is the leftmost column and the number increases going from left to right.
+            '''
+          },
+          {
+            "role": "user",
+            "content": "[[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,-1,1], [0,0,0,0,-1,-1,-1], [1,1,1,-1,-1,1,1]]"
+          },
+          {
+            "role": "assistant",
+            "content": "6"
+          },
+          {
+            "role": "user",
+            "content": "[[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [1,1,1,0,-1,-1,0]]"
+          },
+          {
+            "role": "assistant",
+            "content": "3"
+          },
+          {
+            "role": "user",
+            "content": board_str
+          }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
 
-    #TODO
-    def alpha_beta_max(self, player, limit, alpha, beta):
+      return response.choices[0].message.content
 
-        if self.game_over() or limit == 0:
-            curr_val = len(list(self.legal_moves()))
-            return None, curr_val, 1
-
-        curr_val = -math.inf
-        curr_leaves = 0
-        curr_move = None
-
-        for next_move, next_board in self.successors(player):
-            best_move, best_val, total_leaves = next_board.alpha_beta_min(player * -1, limit - 1, alpha, beta)
-            curr_leaves += total_leaves
-            if best_val > curr_val:
-                curr_val, curr_move = best_val, next_move
-                alpha = max(alpha, curr_val)
-            if curr_val >= beta:
-                return curr_move, curr_val, curr_leaves
-        return curr_move, curr_val, curr_leaves
-
-    #TODO
-    def alpha_beta_min(self, player, limit, alpha, beta):
-        if self.game_over() or limit == 0:
-            curr_val = len(list(self.legal_moves()))
-            return None, curr_val, 1
-
-        curr_val = math.inf
-        curr_leaves = 0
-        curr_move = None
-
-        for next_move, next_board in self.successors(player):
-            best_move, best_val, total_leaves = next_board.alpha_beta_max(player * -1, limit - 1, alpha, beta)
-            curr_leaves += total_leaves
-            if best_val < curr_val:
-                curr_val, curr_move = best_val, next_move
-                beta = min(beta, curr_val)
-            if curr_val <= alpha:
-                return curr_move, curr_val, curr_leaves
-        return curr_move, curr_val, curr_leaves
-
-    def get_best_move(self, limit, player):
-        #return self.get_random_move()
-        return self.alpha_beta_max(player, limit, -math.inf, math.inf)
+    def get_best_move(self):
+      return self.get_llm_move(str(self.get_board()))
 
     def get_space(self, space_str):
       response = self.client.chat.completions.create(
@@ -293,6 +293,14 @@ class ConnectFour(Game):
           {
             "role": "assistant",
             "content": "2"
+          },
+          {
+            "role": "user",
+            "content": "Two right of the middle row."
+          },
+          {
+            "role": "assistant",
+            "content": "5"
           },
           {
             "role": "user",

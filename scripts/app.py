@@ -59,16 +59,16 @@ def move_ttt():
                 ttt.perform_move(row, col, 1)
                 
                 if not ttt.game_over():
-                    move = ttt.get_random_move()
-                    # TODO: Figure out why the get the best move is stalling infinitely
-                    '''
                     if ttt.get_attributes()[0]:
-                        move = ttt.get_best_move(-1)[0]
-                        if random.random() > 0.8 or move == None:
+                        move = ttt.get_best_move()
+                        if move.isnumeric():
+                            move = (math.floor(int(move) / 3), int(move) % 3)
+                        else:
+                            move = ttt.get_random_move()
+                        if random.random() > 0.8 or not ttt.is_legal_move(move[0], move[1]):
                             move = ttt.get_random_move()
                     else:
                         move = ttt.get_random_move()
-                    '''
                     ttt.perform_move(move[0], move[1], -1)
                 
                 if ttt.has_winner() == 1:
@@ -104,16 +104,12 @@ def move_c4():
                 connect4.perform_move(int(move), 1)
                 
                 if not connect4.game_over():
-                    move = connect4.get_random_move()
-                    # TODO: Figure out why the get the best move is stalling infinitely
-                    '''
                     if connect4.get_attributes()[0]:
-                        move = connect4.get_best_move(-1)[0]
-                        if random.random() > 0.8 or move == None:
+                        move = connect4.get_best_move()
+                        if not move.isnumeric() or random.random() > 0.8 or not connect4.is_legal_move(int(move)):
                             move = connect4.get_random_move()
                     else:
                         move = connect4.get_random_move()
-                    '''
                     connect4.perform_move(int(move), -1)
                 
                 if connect4.has_winner() == 1:

@@ -58,7 +58,10 @@ export default function Connect4() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ 
+                move: move, 
+             })
         })
         .then(response => response.json())
         .then(data => {
