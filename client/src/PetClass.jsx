@@ -9,18 +9,28 @@ export const useGlobalState = () => useContext(GlobalStateContext);
 // Provider component to wrap your app and provide the global state
 export const PetClass = ({ children }) => {
 
-  const [name, setName] = useState("");
+  // name and physical
+  const [name, setName] = useState("Mr Whiskers");
+  const [physical, setPhysical] = useState("A colorful basketball");
   
+  // preferences 
+  const [favColor, setFavColor] = useState("blue");
+  
+  // personality
   const [competitive, setCompetitive] = useState(false);
-  const [cheerful, setCheerful] = useState(true);
   const [talkative, setTalkative] = useState(true);
 
-  const [quicklyHungry, setQuicklyHungry] = useState(false);
+  // conversation style
+  const [voice, setVoice] = useState(0);
+  const [conversationStyle, setConversationStyle] = useState("yoda"); // poetic, yoda, baby, goofy
 
-  const [happiness, setHappiness] = useState(6);
-  const [hunger, setHunger] = useState(5);
+  // preferences for feeding 
+  const [quicklyHungry, setQuicklyHungry] = useState(false);
   const [likesSweet, setLikesSweet] = useState(false);
 
+  // mood indicators 
+  const [happiness, setHappiness] = useState(6);
+  const [hunger, setHunger] = useState(5);
 
   const [count, setCount] = useState(0);
 
@@ -43,13 +53,16 @@ export const PetClass = ({ children }) => {
   return (
     <GlobalStateContext.Provider value={{ 
       name, setName,
+      physical, setPhysical,
+      favColor, setFavColor,
       competitive, setCompetitive,
-      cheerful, setCheerful,
       talkative, setTalkative,
+      voice, setVoice,
       quicklyHungry, setQuicklyHungry,
       happiness, setHappiness, 
       hunger, setHunger, 
-      likesSweet, setLikesSweet 
+      likesSweet, setLikesSweet,
+      conversationStyle, setConversationStyle
       }}>
       {children}
     </GlobalStateContext.Provider>
