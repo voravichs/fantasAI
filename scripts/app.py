@@ -129,6 +129,20 @@ def move_c4():
     return jsonify({"board" : connect4.get_board(), "response" : response})
 
 
+@app.route('/api/feed_talk_to_pet', methods=['POST'])
+def generate_convo_with_pet():
+
+    data = request.json
+    likes_sweet = data.get("likes_sweet")
+    description = data.get("description")
+    talkative = data.get("talkative")
+    cheerful = data.get("cheerful")
+
+    answer = feedPetAction.talk_to_pet(description, likes_sweet, talkative, cheerful)
+
+    return jsonify({"answer": answer})
+
+
 @app.route('/api/food', methods=['POST'])
 def generate_food_options():
 
@@ -149,7 +163,7 @@ def generate_food_options():
     # Construct the dictionary
     food_dict = {name.strip(): des.strip() for name, des in matches}
 
-    narration = feedPetAction.open_fridge()
+    narration = "You use your magical powers to summon some food."
 
     return jsonify({"food": food_dict, "food_type": food_pair, "narration": narration})
 
@@ -164,29 +178,27 @@ def generate_feed_pet():
     likes_sweet = data.get('likes_sweet')
     cheerful = data.get('cheerful')
     talkative = data.get('talkative')
-
+    
+    describe = f"You feed your pet {food_choice}."  
+    
     if hunger_level < 0:
-        describe = feedPetAction.pet_too_full(food_choice)
-        pet_answer = feedPetAction.pet_answer("full", False, food_choice, talkative, cheerful)
+        pet_answer = feedPetAction.pet_too_full_answer(False, food_choice, talkative, cheerful, describe, likes_sweet)
 
-    if food_type == "rotten":
+    elif food_type == "rotten":
         hunger_level = hunger_level - 1
-        happiness_level = happiness_level - 2
-        describe = feedPetAction.feed_pet_rotten_food(food_choice)
+        happiness_level = happiness_level - 2  
         # nature of conversation, fav_food, food_choice, talkative, cheerful
-        pet_answer = feedPetAction.pet_answer("rotten", False, food_choice, talkative, cheerful)
+        pet_answer = feedPetAction.pet_answer("rotten", False, food_choice, talkative, cheerful, describe, likes_sweet)
     elif (likes_sweet and food_type == "sweet") or (not likes_sweet and food_type == "savory"):
         hunger_level = hunger_level - 2
         happiness_level = happiness_level + 3
-        describe = feedPetAction.feed_pet_fav_food(food_choice)
         # nature of conversation, fav_food, food_choice, talkative, cheerful
-        pet_answer = feedPetAction.pet_answer("thank", True, food_choice, talkative, cheerful)
+        pet_answer = feedPetAction.pet_answer("thank", True, food_choice, talkative, cheerful, describe, likes_sweet)
     else:
         hunger_level = hunger_level - 2
         happiness_level = happiness_level + 1
-        describe = feedPetAction.feed_pet_avg_food(food_choice)
         # nature of conversation, fav_food, food_choice, talkative, cheerful
-        pet_answer = feedPetAction.pet_answer("thank", False, food_choice, talkative, cheerful)
+        pet_answer = feedPetAction.pet_answer("thank", False, food_choice, talkative, cheerful, describe, likes_sweet)
 
     return jsonify({"describe": describe, "pet_answer": pet_answer, "happiness": happiness_level, "hunger": hunger_level})
 

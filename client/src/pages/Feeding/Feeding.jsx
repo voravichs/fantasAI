@@ -13,7 +13,7 @@ export default function Feeding() {
         hunger, setHunger, 
         likesSweet, setLikesSweet} = useGlobalState();
 
-    const [userDescription, setUserDescription] = useState({});
+    const [userDescription, setUserDescription] = useState('');
     const [conversation, setConversation] = useState([]);
     const [foodOptions, setFoodOptions] = useState({});
     const [foodTypeOptions, setFoodTypeOptions] = useState({});
@@ -67,10 +67,31 @@ export default function Feeding() {
         .then(data => {
             const newConversation = [...conversation, { role: 'narration', content: data.describe }, { role: 'pet', content: data.pet_answer }];
             setConversation(newConversation);
-            setFoodAte(key);
+            console.log("happiness:")
+            console.log(data.happiness);
             setHappiness(data.happiness);
+            console.log("hunger:")
+            console.log(data.hunger);
             setHunger(data.hunger);
             setUserDescription('');
+        })
+        .catch(error => console.error('Error:', error));
+    };
+
+    const handleTalkToPet = () => {
+        fetch('http://localhost:8000/api/feed_talk_to_pet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ description: userDescription, likes_sweet: likesSweet, talkative: talkative, cheerful: cheerful })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const newConversation = [...conversation, { role: 'pet', content: data.answer }];
+            setConversation(newConversation);
+            setUserDescription('');
+            setModalIsOpen(false); // Close the modal after generating pet response
         })
         .catch(error => console.error('Error:', error));
     };
@@ -78,6 +99,7 @@ export default function Feeding() {
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault(); // Prevent default behavior of form submission
+            handleTalkToPet();
         }
 
     };
@@ -107,7 +129,7 @@ export default function Feeding() {
                             </div>
                         </div>
                         <div className="input-group">
-                            <button id="generate-btn" onClick={handleGenerateFood}>Open the fridge</button>
+                            <button id="generate-btn" onClick={handleGenerateFood}>Use a spell to create food</button>
                             <div className="foodOptions" ref={conversationRef}>
                                 <p>Click on a food item to feed your pet!</p>
                                 <div className='food-row'>
@@ -125,6 +147,7 @@ export default function Feeding() {
 
 
                     <div className="right-column">
+                        <label htmlFor="description">Conversation with pet</label>
                         <div className="conversation" ref={conversationRef}>
                             {conversation.map((message, index) => (
                                 <div key={index} className={`message ${message.role}`}>
@@ -140,12 +163,11 @@ export default function Feeding() {
                             onChange={(e) => setUserDescription(e.target.value)}
                             onKeyDown={handleKeyPress} // Call handleKeyPress on key down event
                         ></textarea>
-                    </div>
 
                     </div>
 
-    
-                    
+                    </div>
+       
                 </div>
             </main>
         </div>

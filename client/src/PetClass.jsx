@@ -14,24 +14,30 @@ export const PetClass = ({ children }) => {
   const [competitive, setCompetitive] = useState(false);
   const [cheerful, setCheerful] = useState(true);
   const [talkative, setTalkative] = useState(true);
-  
-  const [quicklyHungry, setQuicklyHungry] = useState(true);
+
+  const [quicklyHungry, setQuicklyHungry] = useState(false);
 
   const [happiness, setHappiness] = useState(6);
   const [hunger, setHunger] = useState(5);
-  const [likesSweet, setLikesSweet] = useState(true);
+  const [likesSweet, setLikesSweet] = useState(false);
 
 
   const [count, setCount] = useState(0);
+
+  var time = 30000;
+
+  if (quicklyHungry){
+    time = 20000;
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCount(prevCount => prevCount + 1);
       setHunger(prevHunger => prevHunger + 1);
       setHappiness(prevHappiness => prevHappiness - 1);
-    }, 10000);
+    }, time);
     return () => clearInterval(interval);
-  }, []);
+  });
 
 
   return (
