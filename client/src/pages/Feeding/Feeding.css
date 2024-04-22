@@ -89,12 +89,30 @@ body, h1, h2, p, label, input, select, textarea, button {
     bottom: 0;
     width: 100%;
   }
+
+  .pet-details {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
   
-  .input-group {
+  .pet-stats {
+    border: solid;
+    border-color: white;
+    padding: 10px;
+    margin: 10px;
+  } 
+
+  .fridge {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-bottom: 10px;
+    margin-top: 10px;
+
   }
   
   .label-row {
@@ -143,6 +161,19 @@ body, h1, h2, p, label, input, select, textarea, button {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
+  }
+
+  .food-title {
+    margin: 0px;
+    text-align: center;
+    font-weight: 1000;
+  }
+
+  .food-des {
+    margin: 0px;
+    text-align: center;
+    font-size: 15px;
+    font-style: italic;
   }
 
 

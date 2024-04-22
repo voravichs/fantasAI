@@ -5,13 +5,12 @@ import { Link } from "wouter";
 
 export default function Feeding() {
     
-    const {name, setName,
-        cheerful, setCheerful,
-        talkative, setTalkative,
-        quicklyHungry, setQuicklyHungry,
+    const {
         happiness, setHappiness, 
         hunger, setHunger, 
-        likesSweet, setLikesSweet} = useGlobalState();
+        conversationStyle,
+        talkative,
+        likesSweet } = useGlobalState();
 
     const [userDescription, setUserDescription] = useState('');
     const [conversation, setConversation] = useState([]);
@@ -59,7 +58,7 @@ export default function Feeding() {
                 happiness_level: happiness, 
                 likes_sweet: likesSweet, 
                 food_type: curFoodType,
-                cheerful: cheerful,
+                conversationStyle: conversationStyle,
                 talkative: talkative,
              })
         })
@@ -84,7 +83,7 @@ export default function Feeding() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ description: userDescription, likes_sweet: likesSweet, talkative: talkative, cheerful: cheerful })
+            body: JSON.stringify({ description: userDescription, likes_sweet: likesSweet, talkative: talkative, conversationStyle: conversationStyle })
         })
         .then(response => response.json())
         .then(data => {
@@ -117,27 +116,29 @@ export default function Feeding() {
                    
                    <div className="column-div">
                     <div className="left-column">
+                        <div className = "pet-details">
                         <div>
                             <img src={uploadedImage ? URL.createObjectURL(uploadedImage) : '/Frog.gif'} alt="Pet" className="pet-image" />
                         </div>
-                        <div className="pet-stats" ref={conversationRef}>
-                            <div>
+                        <div  ref={conversationRef}>
+                            <div className="pet-stats">
                                     Hunger Level: {hunger}
                             </div>
-                            <div>
+                            <div className="pet-stats">
                                     Happiness Level: {happiness}
                             </div>
                         </div>
-                        <div className="input-group">
+                        </div>
+                        <div className="fridge">
                             <button id="generate-btn" onClick={handleGenerateFood}>Use a spell to create food</button>
                             <div className="foodOptions" ref={conversationRef}>
-                                <p>Click on a food item to feed your pet!</p>
+                                {Object.keys(foodOptions).length === 0 ? <p></p> : <p>Click on a food item to feed your pet!</p>}
                                 <div className='food-row'>
                                     {Object.entries(foodOptions).map(([key, val]) => (
-                                        <div className="food-box" key={key} onClick={() => handleGenerateFeedPet(key)}>
-                                        <h3>{key}</h3>
-                                        <p>{val}</p>
-                                        </div>
+                                        <button className="food-box" key={key} onClick={() => handleGenerateFeedPet(key)}>
+                                        <p className = "food-title">{key}</p>
+                                        <p className = "food-des">{val}</p>
+                                        </button>
                                     ))}
                                 </div>
                             </div>
