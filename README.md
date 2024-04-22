@@ -6,9 +6,9 @@ py -mvenv fantasia_venv
 
 source fantasia_venv/bin/activate 
 OR 
-source fantasia_venv/Scripts/activate
+source fantasia_venv/Scripts/activate 
 
-pip install flask flask-cors openai pygame python-dotenv "kani[openai]" d20
+pip install flask flask-cors openai pygame python-dotenv "kani[openai]" d20 ipython
 
 npm run install:all
 

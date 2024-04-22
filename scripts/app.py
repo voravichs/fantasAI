@@ -4,6 +4,7 @@ from chatbot import Chatbot
 from feeding import FeedPetAction
 from games import TicTacToe
 from games import ConnectFour
+from petgen import PetGeneration
 import os
 from flask_cors import CORS
 import threading
@@ -17,6 +18,7 @@ chatbot = Chatbot()  # Instantiate your Chatbot class
 feedPetAction = FeedPetAction()
 ttt = TicTacToe([[0,0,0], [0,0,0], [0,0,0]], True)
 connect4 = ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]], True)
+petGen = PetGeneration()
 
 # Define the path to the React build folder
 react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')
@@ -25,6 +27,13 @@ react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'bu
 @app.route('/')
 def index():
     return app.send_static_file(react_build_path + 'index.html')
+
+@app.route('/api/describe_image', methods=['POST'])
+def describe_image():
+    data = request.json
+    os.chdir('../')
+    desc = petGen.describe_image(data.get("url"))
+    return jsonify({"description" : desc})
 
 @app.route('/api/new_ttt', methods=['POST'])
 def new_ttt():
