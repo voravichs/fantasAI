@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        header: '#ba69a6',
+      },
       fontFamily: {
         'title': ["Black Chancery", "serif"],
       },

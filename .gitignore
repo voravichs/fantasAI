@@ -18,3 +18,5 @@
 # Ignore helicone_key.txt
 /scripts/helicone_key.txt
 
+# ignore uploads
+/pet_generation_images/uploads
