@@ -109,7 +109,7 @@ class TicTacToe(Game):
           }
         ],
         temperature=1,
-        max_tokens=256,
+        max_tokens=1,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
@@ -122,7 +122,7 @@ class TicTacToe(Game):
 
     def get_space(self, space_str):
       response = self.client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
           {
             "role": "system",
@@ -130,7 +130,7 @@ class TicTacToe(Game):
           },
           {
             "role": "user",
-            "content": "I want to place my X in the middle square to the "
+            "content": "I want to place my X in the middle square to the right"
           },
           {
             "role": "assistant",
@@ -142,7 +142,7 @@ class TicTacToe(Game):
           }
         ],
         temperature=1,
-        max_tokens=256,
+        max_tokens=1,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
@@ -267,7 +267,7 @@ class ConnectFour(Game):
           }
         ],
         temperature=1,
-        max_tokens=256,
+        max_tokens=1,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
@@ -280,7 +280,7 @@ class ConnectFour(Game):
 
     def get_space(self, space_str):
       response = self.client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
           {
             "role": "system",
@@ -308,110 +308,10 @@ class ConnectFour(Game):
           }
         ],
         temperature=1,
-        max_tokens=256,
+        max_tokens=1,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
       )
 
       return response.choices[0].message.content
-
-def create_tictactoe_game(competitive):
-    return TicTacToe([[0,0,0], [0,0,0], [0,0,0]], competitive)
-
-def create_connectfour_game(competitive):
-    return ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]], competitive)
-
-def playTicTacToe(competitive):
-  game = create_tictactoe_game(competitive)
-
-  game.talk("Time to start playing. You are X's, I am O's. You go first!")
-  player = 1
-
-  while not game.game_over():
-    if player == 1:
-      valid_choice = False
-      while not valid_choice:
-        if not valid_choice:
-          game.talk('Ok, the board now looks like this:\n' + str(game))
-          game.talk('What square do you want to choose?: ')
-          val = game.get_space(input())
-          if val.isnumeric():
-            if -1<int(val)<9:
-              row = math.floor(int(val) / 3)
-              col = int(val) % 3
-              if game.is_legal_move(row, col):
-                game.perform_move(row, col, player)
-                valid_choice = True
-              else:
-                game.talk("You can't make that move. Choose a different one!")
-            else:
-              game.talk("That isn't a valid number. Choose a different one!")
-          else:
-            game.talk("That isn't a number. Choose a different one!")
-    else:
-      game.talk('Ok, My turn!')
-      if game.get_attributes()[2]:
-        move = game.get_best_move(player)[0]
-        if random.random() > 0.8 or move == None:
-          move = game.get_random_move()
-      else:
-        move = game.get_random_move()
-      game.perform_move(move[0], move[1], player)
-
-    player = player * -1
-
-  if game.has_winner() == 1:
-    winner = "You"
-  elif game.has_winner() == -1:
-    winner = "I"
-  else:
-    winner = "It's a tie, so nobody"
-  game.talk('The game is over! ' + winner + " won!")
-  game.talk('The final board looks like this:\n' + str(game))
-
-def playConnectFour(competitive):
-  game = create_connectfour_game(competitive)
-
-  game.talk("Time to start playing. You are X's, I am O's. You go first!")
-  player = 1
-
-  while not game.game_over():
-    if player == 1:
-      valid_choice = False
-      while not valid_choice:
-        if not valid_choice:
-          game.talk('Ok, the board now looks like this:\n' + str(game))
-          game.talk('What row do you want to choose?: ')
-          val = game.get_space(input())
-          if val.isnumeric():
-            if -1<int(val)<7:
-              if game.is_legal_move(int(val)):
-                game.perform_move(int(val), player)
-                valid_choice = True
-              else:
-                game.talk("You can't make that move. Choose a different one!")
-            else:
-              game.talk("That isn't a valid number. Choose a different one!")
-          else:
-            game.talk("That isn't a number. Choose a different one!")
-    else:
-      game.talk('Ok, My turn!')
-      if game.get_attributes()[2]:
-        move = game.get_best_move(10, player)[0]
-        if random.random() > 0.8 or move == None:
-          move = game.get_random_move()
-      else:
-        move = game.get_random_move()
-      game.perform_move(move, player)
-
-    player = player * -1
-
-  if game.has_winner() == 1:
-    winner = "You"
-  elif game.has_winner() == -1:
-    winner = "I"
-  else:
-    winner = "It's a tie, so nobody"
-  game.talk('The game is over! ' + winner + " won!")
-  game.talk('The final board looks like this:\n' + str(game))

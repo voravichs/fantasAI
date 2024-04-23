@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import './Connect4.css'; // Import your CSS file
+import './TTT.css'; // Import your CSS file
 import { useGlobalState } from '../../PetClass';
 import { Link } from "wouter";
 
@@ -15,24 +15,15 @@ export default function Connect4() {
 
     const [board, setBoard] = useState([[0,0,0], [0,0,0], [0,0,0]])
     const [response, setResponse] = useState("Default Response")
-
     const [move, setMove] = useState('');
-    const [conversation, setConversation] = useState([]);
-    const [foodOptions, setFoodOptions] = useState({});
-    const [foodTypeOptions, setFoodTypeOptions] = useState({});
     const [uploadedImage, setUploadedImage] = useState(null);
+    const [conversation, setConversation] = useState([]);
     const conversationRef = useRef(null);
+
 
     useEffect(() => {
         conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
     }, [conversation]);
-
-    const handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent default behavior of form submission
-        }
-    };
-
     
     const handleMakeTTTBoard = (key) => {
         setResponse("Ok, Let's start a new game!")
@@ -40,10 +31,7 @@ export default function Connect4() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                competitive: competitive, 
-             })
+            }
         })
         .then(response => response.json())
         .then(data => {
