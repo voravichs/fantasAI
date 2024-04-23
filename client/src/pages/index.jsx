@@ -6,6 +6,7 @@ import NoPage from "./NoPage"
 import Game from "./Game/Game"
 import TTT from "./Game/TTT"
 import Connect4 from "./Game/Connect4"
+import ImageSelect from "./PetGen/ImageSelect"
 
 export {
     Feeding,
@@ -15,5 +16,6 @@ export {
     NoPage,
     Game,
     TTT,
-    Connect4
+    Connect4,
+    ImageSelect
 }

@@ -9,6 +9,9 @@ export const useGlobalState = () => useContext(GlobalStateContext);
 // Provider component to wrap your app and provide the global state
 export const PetClass = ({ children }) => {
 
+  // Selected File
+  const [selectedFile, setSelectedFile] = useState("")
+
   // name and physical
   const [name, setName] = useState("Mr Whiskers");
   const [physical, setPhysical] = useState("A colorful basketball");
@@ -38,7 +41,7 @@ export const PetClass = ({ children }) => {
 
   if (quicklyHungry){
     time = 20000;
-  };
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,6 +55,7 @@ export const PetClass = ({ children }) => {
 
   return (
     <GlobalStateContext.Provider value={{ 
+      selectedFile, setSelectedFile,
       name, setName,
       physical, setPhysical,
       favColor, setFavColor,

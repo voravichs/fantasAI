@@ -54,14 +54,14 @@ export default function HomePage() {
                         </motion.span>
                 </motion.div>
                 <div className="flex gap-8">
+                    <Link href="/petgen">
+                        <button className="text-4xl py-4 px-8">Generate a Pet</button>
+                    </Link>
                     <Link href="/chat">
                         <button className="text-4xl py-4 px-8">Chat</button>
                     </Link>
                     <Link href="/feeding">
                         <button className="text-4xl py-4 px-8">Feeding </button>
-                    </Link>
-                    <Link href="/petgen">
-                        <button className="text-4xl py-4 px-8">PetGen</button>
                     </Link>
                     <Link href="/game">
                         <button className="text-4xl py-4 px-8">Games</button>
