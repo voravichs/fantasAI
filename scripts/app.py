@@ -16,8 +16,8 @@ app = Flask(__name__)
 CORS(app)
 chatbot = Chatbot()  # Instantiate your Chatbot class
 feedPetAction = FeedPetAction()
-ttt = TicTacToe([[0,0,0], [0,0,0], [0,0,0]], True)
-connect4 = ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]], True)
+ttt = TicTacToe([[0,0,0], [0,0,0], [0,0,0]])
+connect4 = ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]])
 petGen = PetGeneration()
 
 # Define the path to the React build folder
@@ -39,10 +39,22 @@ def generate_image():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+@app.route('/api/setup_games', methods=['POST'])
+def setup_games():
+    data = request.json
+    name = data.get("name")
+    physical_details = data.get("physical_details")
+    fav_color = data.get("fav_color")
+    competitive = data.get("competitive")
+    ttt.set_attributes(name, physical_details, fav_color, competitive)
+    connect4.set_attributes(name, physical_details, fav_color, competitive)
+    return ""
+
 @app.route('/api/new_ttt', methods=['POST'])
 def new_ttt():
     ttt.reset()
     return jsonify({"board" : ttt.get_board()})
+
 
 @app.route('/api/new_c4', methods=['POST'])
 def new_c4():
@@ -72,13 +84,13 @@ def move_ttt():
                 ttt.perform_move(row, col, 1)
                 
                 if not ttt.game_over():
-                    if ttt.get_attributes()[0]:
+                    if ttt.get_attributes()[3]:
                         move = ttt.get_best_move()
                         if move.isnumeric():
                             move = (math.floor(int(move) / 3), int(move) % 3)
                         else:
                             move = ttt.get_random_move()
-                        if random.random() > 0.8 or not ttt.is_legal_move(move[0], move[1]):
+                        if random.random() > 0.9 or not ttt.is_legal_move(move[0], move[1]):
                             move = ttt.get_random_move()
                     else:
                         move = ttt.get_random_move()
@@ -89,7 +101,7 @@ def move_ttt():
                 elif ttt.has_winner() == -1:
                     response = ttt.talk('The game is over! I won!')
                 else:
-                    response = ttt.talk('Nice Move! I made a move as well!')
+                    response = ttt.talk(f'Nice Move! I made a move as well!', prior=data.get("move"))
         
             else:
                 response = ttt.talk("You can't make that move. Choose a different one!")
@@ -117,7 +129,7 @@ def move_c4():
                 connect4.perform_move(int(move), 1)
                 
                 if not connect4.game_over():
-                    if connect4.get_attributes()[0]:
+                    if connect4.get_attributes()[3]:
                         move = connect4.get_best_move()
                         if not move.isnumeric() or random.random() > 0.8 or not connect4.is_legal_move(int(move)):
                             move = connect4.get_random_move()
@@ -130,7 +142,7 @@ def move_c4():
                 elif connect4.has_winner() == -1:
                     response = connect4.talk('The game is over! I won!')
                 else:
-                    response = connect4.talk('Nice Move! I made a move as well!')
+                    response = connect4.talk('Nice Move! I made a move as well!', prior=data.get("move"))
         
             else:
                 response = connect4.talk("You can't make that move. Choose a different one!")

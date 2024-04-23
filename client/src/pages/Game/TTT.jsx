@@ -8,24 +8,30 @@ import { Link } from "wouter";
 export default function Connect4() {
     const {name, setName,
         competitive, setCompetitive,
-        cheerful, setCheerful,
-        talkative, setTalkative,
-        quicklyHungry, setQuicklyHungry,
-        happiness, setHappiness, 
-        hunger, setHunger, 
-        likesSweet, setLikesSweet} = useGlobalState();
+        physical, setPhysical,
+        favColor, setFavColor} = useGlobalState();
 
     const [board, setBoard] = useState([[0,0,0], [0,0,0], [0,0,0]])
-    const [response, setResponse] = useState("Default Response")
+    const [response, setResponse] = useState("Let's Play Tic Tac Toe!")
     const [move, setMove] = useState('');
     const [uploadedImage, setUploadedImage] = useState(null);
-    const [conversation, setConversation] = useState([]);
-    const conversationRef = useRef(null);
 
-
-    useEffect(() => {
-        conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
-    }, [conversation]);
+    const handleSetupGame = (key) => {
+        fetch('http://localhost:8000/api/setup_games', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                name: name,
+                physical_details: physical,
+                fav_color: favColor,
+                competitive: competitive
+             })
+        })
+        .then(response => response.json())
+        .catch(error => console.error('Error:', error));
+    };
     
     const handleMakeTTTBoard = (key) => {
         setResponse("Ok, Let's start a new game!")
@@ -50,7 +56,7 @@ export default function Connect4() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ 
-                move: move, 
+                move: move
              })
         })
         .then(response => response.json())
@@ -63,13 +69,14 @@ export default function Connect4() {
     
 
     return (
-        <div>
+        <div onLoad={handleSetupGame}>
             <Header/>
             <main>
             <div className="column-div">
                 <div className="left-column">
                     <div>
                         <img src={uploadedImage ? URL.createObjectURL(uploadedImage) : '/Frog.gif'} alt="Pet" className="pet-image" />
+                        <p>{response}</p>
                     </div>
                     <button id="generate-btn" onClick={handleMakeTTTBoard}>Start a New Game</button>
                     <label htmlFor="next_move">Type where you want to make a move</label>
@@ -81,29 +88,17 @@ export default function Connect4() {
                     ></textarea>
                     <button id="generate-btn" onClick={handleMakeTTTMove}>Make Your Move</button>
                 </div>
-                    
-
 
                 <div className="right-column">
-                    <div className="conversation" ref={conversationRef}>
-                        {conversation.map((message, index) => (
-                            <div key={index} className={`message ${message.role}`}>
-                                {message.content}
-                            </div>
-                        ))}
-                    </div>
-                    <div>
+                    <p>
                         {board[0][0]}{board[0][1]}{board[0][2]}
-                    </div>
-                    <div>
+                    </p>
+                    <p>
                         {board[1][0]}{board[1][1]}{board[1][2]}
-                    </div>
-                    <div>
+                    </p>
+                    <p>
                         {board[2][0]}{board[2][1]}{board[2][2]}
-                    </div>
-                    <div>
-                        {response}
-                    </div>
+                    </p>
                 </div>
 
             </div>

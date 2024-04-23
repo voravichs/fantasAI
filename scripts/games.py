@@ -8,20 +8,82 @@ import openai
 from openai import OpenAI
 
 class Game():
-  def __init__(self, competitive):
-    self.competitive = competitive
+  def __init__(self):
     self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
+    self.name = ""
+    self.physical_details = ""
+    self.fav_color = ""
+    self.competitive = True
 
   def get_attributes(self):
-    return [self.competitive]
+    return (self.name, self.physical_details, self.fav_color, self.competitive)
+  
+  def set_attributes(self, name, phys, color, compet):
+    self.name = name
+    self.physical_details = phys
+    self.fav_color = color
+    self.competitive = compet
 
-  def talk(self, context):
-    return context
+  def talk(self, context, prior=""):
+    not_competitive = "" if self.competitive else "not "
+    
+    if prior == "":
+      personality = f"""You are a friendly tamagochi-like pet named {self.name}.
+        You look like this: {self.physical_details}.
+        Your favorite color is {self.fav_color}.
+        You are {not_competitive}competitive.
+        Rewrite the following text in a style matching your personality and include personal details when appropriate."""
+      
+      messages=[
+          {
+            "role": "system",
+            "content": personality
+          },
+          {
+            "role": "user",
+            "content": context
+          }
+        ]
+    else:
+      personality = f"""You are a friendly tamagochi-like pet named {self.name}.
+        You look like this: {self.physical_details}.
+        Your favorite color is {self.fav_color}.
+        You are {not_competitive}competitive.
+        The first statement you must respond to. The second statement you must rewrite.
+        Rewrite the assistant text in a style matching your personality and include personal details when appropriate.
+        Make sure to respond to what the user said as well."""
+      
+      messages=[
+          {
+            "role": "system",
+            "content": personality
+          },
+          {
+            "role": "user",
+            "content": prior
+          },
+          {
+            "role": "user",
+            "content": context
+          }
+        ]
+
+    response = self.client.chat.completions.create(
+      model="gpt-3.5-turbo",
+        messages=messages,
+        temperature=1,
+        max_tokens=100,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+
+    return response.choices[0].message.content
 
 class TicTacToe(Game):
 
-    def __init__(self, board, competitive):
-      super().__init__(competitive)
+    def __init__(self, board):
+      super().__init__()
       self.board = board
       self.wins = [[(0,0),(0,1),(0,2)], [(1,0),(1,1),(1,2)], [(2,0),(2,1),(2,2)],
                   [(0,0),(1,0),(2,0)], [(0,1),(1,1),(2,1)], [(0,2),(1,2),(2,2)],
@@ -152,8 +214,8 @@ class TicTacToe(Game):
 
 class ConnectFour(Game):
 
-    def __init__(self, board, competitive):
-      super().__init__(competitive)
+    def __init__(self, board):
+      super().__init__()
       self.board = board
 
     def __str__(self):
@@ -280,7 +342,7 @@ class ConnectFour(Game):
 
     def get_space(self, space_str):
       response = self.client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
           {
             "role": "system",
