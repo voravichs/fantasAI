@@ -21,19 +21,23 @@ connect4 = ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,
 petGen = PetGeneration()
 
 # Define the path to the React build folder
-react_build_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build')
+react_build_path = os.path.join(os.path.dirname(__file__), '..', 'client', 'build')
 
 # Serve the static files from the React build folder
 @app.route('/')
 def index():
     return app.send_static_file(react_build_path + 'index.html')
 
-@app.route('/api/describe_image', methods=['POST'])
-def describe_image():
+@app.route('/api/generate_image', methods=['POST'])
+def generate_image():
     data = request.json
-    os.chdir('../')
     desc = petGen.describe_image(data.get("url"))
-    return jsonify({"description" : desc})
+    json_prompt = petGen.generate_json(desc)
+    augmented_prompt = petGen.augment_prompt(json_prompt)
+    link = petGen.generate_image_link(augmented_prompt)
+    response = jsonify({"link" : list(link)[0], "json": json_prompt})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/api/new_ttt', methods=['POST'])
 def new_ttt():

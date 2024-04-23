@@ -35,7 +35,7 @@ class PetGeneration:
                 "content": [
                     {
                     "type": "text",
-                    "text": "What's in this image? Describe the image as whimsically as possible as if you were a Disney character."
+                    "text": "What's in this image?"
                     },
                     {
                     "type": "image_url",
@@ -56,20 +56,20 @@ class PetGeneration:
     def augment_prompt(self, initial_description) -> str:
         augmented_prompt = ""
         messages = [
-            {'role': 'system', 'content': "Rewrite the description to be an image prompt for Dall-E. Specify that the image must be in the style of early Disney 2D animated movies, inspired by the style of Fantasia. Specify that no text should be in the image at all."},
+            {'role': 'system', 'content': "Rewrite the description to be an image prompt for Dall-E. Specify that the image must be in the style of early Disney 2D animated movies, inspired by the style of Fantasia. Specify that no text should be in the image at all. Do not generate a reference sheet. If the subject of the image is an object, anthropomorphize them in in a cartoony way"},
             {'role': 'user', 'content': initial_description},
         ]
         
         client = OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.environ['HELICONE_API_KEY'])
         
         response = client.chat.completions.create(
-        model='gpt-4',
-        messages=messages,
-        temperature=1,
-        max_tokens=1028,
-        top_p=1.0,
-        frequency_penalty=0,
-        presence_penalty=0
+            model='gpt-4',
+            messages=messages,
+            temperature=1,
+            max_tokens=1028,
+            top_p=1.0,
+            frequency_penalty=0,
+            presence_penalty=0
         )
         augmented_prompt = response.choices[0].message.content
         return augmented_prompt
@@ -77,7 +77,7 @@ class PetGeneration:
     # Generate a JSON from the image description
     def generate_json(self, desc):
         messages = [
-            {'role': 'system', 'content': "You are an assistant to generate JSONs of imaginary virtual pets. Given a description of an image, imagine the subject of the image as a virtual pet with a certain personality. Use the following format, and return the result as a JSON string:\npet = {\n    \"identity\": {\n        \"name\": str,\n        \"physical_details\": str,\n    },\n    \"personality\": {\n      \"general_personality_desc\": str (lowercase, one word to describe their personality),\n      \"cheerful\": True/False,\n      \"talkative\": True/False,\n      \"voice\": int from 0 - 6,\n      \"fav_color\": [blue, yellow, red, green],\n      \"competitive\": True/False,\n      \"likes_sweet\": True/False,\n      \"quickly_hungry\": True/False,\n    },\n}"},
+            {'role': 'system', "content": "You are an assistant to generate JSONs of imaginary virtual pets. Given a description of an image, imagine the subject of the image as a virtual pet with a certain personality. Try to anthropomorphize the pet in a cartoon-like manner. Use the following format, and return the result as a JSON string:\npet = {\n    \"identity\": {\n        \"name\": str (a proper noun, give a new name if a name is not mentioned),\n        \"physical_details\": str (a description of the main subject of the image),\n        \"full_description:\" str (A paraphrased description of the prompt)\n    },\n    \"personality\": {\n      \"conversationStyle\": str (lowercase, some personality type or archetype to describe their personality when they are speaking),\n      \"talkative\": true/false,\n      \"voice\": int from 0 - 6,\n      \"fav_color\": str (choose one of the common colors, red, green, yellow, orange, violet),\n      \"competitive\": true/false,\n      \"likes_sweet\": true/false,\n      \"quickly_hungry\": true/false,\n    }\n}"},
             {'role': 'user', 'content': desc}  
         ] 
         
@@ -121,11 +121,32 @@ class PetGeneration:
 
         return {"image_path": fp, "original_prompt": prompt, "revised_prompt": image.revised_prompt}
     
+        # generate an image from a prompt, but don't download, just return link
+    def generate_image_link(self, prompt):
+        # generate the image using the OpenAI API
+        resp = self.cv_client.images.generate(
+            prompt=prompt,
+            model="dall-e-3",
+            response_format="url",
+            quality="standard",  # feel free to change to "standard" for some cost savings
+            size="1024x1024",  # also try "1024x1792" for portrait or "1792x1024" for landscape
+            style="vivid",  # "vivid" or "natural"
+        )
+        image = resp.data[0]
+
+        # download the generated image from URL (expires after 60m)
+        # fp = f"pet_generation_images/dalle/{self.make_safe_filename(image.revised_prompt)}"
+        # with open(fp, "wb") as f:
+        #     with self.http.stream("GET", image.url) as r:
+        #         for data in r.iter_bytes():
+        #             f.write(data)
+
+        return {image.url}
+    
 if __name__ == '__main__':
     petGen = PetGeneration()
-    os.chdir('../')
-    description = petGen.describe_image('client/src/assets/images/redpanda.jpg')
-    # json_prompt = petGen.generate_json(description)
-    # augmented_prompt = petGen.augment_prompt(json_prompt)
-    # img_dict = petGen.generate_image(augmented_prompt)
-    print(description)
+    description = petGen.describe_image('src/assets/images/redpanda.jpg')
+    json_prompt = petGen.generate_json(description)
+    augmented_prompt = petGen.augment_prompt(json_prompt)
+    img_link = petGen.generate_image_link(augmented_prompt)
+    print(img_link)
