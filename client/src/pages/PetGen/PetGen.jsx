@@ -38,6 +38,7 @@ export default function PetGen() {
             setLoading(false);
             setImgLink(data.link)
             setPetJSON(JSON.parse(data.json))
+            console.log(JSON.parse(data.json))
         })
         .catch(error => {
             setDescription("Something failed on the backend, please reboot the app!")
@@ -105,7 +106,7 @@ export default function PetGen() {
                 </div>
             </div>
             {imgLink
-                ? <button className='text-3xl'>Save</button>
+                ? <button className='text-3xl' onClick={() => console.log(JSON.stringify(petJSON))}>Save</button>
                 : null}
            
         </div>
