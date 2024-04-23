@@ -49,6 +49,9 @@ export default function Game(){
                         <Link href="/Connect4">
                             <button className="text-4xl py-4 px-8">Connect 4</button>
                         </Link>
+                        <Link href="/Contest">
+                            <button className="text-4xl py-4 px-8">Magic Contest</button>
+                        </Link>
                     </div>
                     
                 </div>

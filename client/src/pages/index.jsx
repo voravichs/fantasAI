@@ -5,6 +5,7 @@ import HomePage from "./HomePage"
 import NoPage from "./NoPage"
 import Game from "./Game/Game"
 import TTT from "./Game/TTT"
+import Contest from "./Game/Contest"
 import Connect4 from "./Game/Connect4"
 import ImageSelect from "./PetGen/ImageSelect"
 
@@ -17,5 +18,6 @@ export {
     Game,
     TTT,
     Connect4,
-    ImageSelect
+    ImageSelect,
+    Contest
 }

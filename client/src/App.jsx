@@ -1,5 +1,5 @@
 import { PetClass } from './PetClass';
-import { Feeding, Chat, PetGen, HomePage, NoPage, Game, TTT, Connect4, ImageSelect} from "./pages"
+import { Feeding, Chat, PetGen, HomePage, NoPage, Game, TTT, Connect4, ImageSelect, Contest} from "./pages"
 import { Route, Switch } from "wouter";
 
 export default function App() {
@@ -15,6 +15,7 @@ export default function App() {
                     <Route path="/game" component={Game}/>
                     <Route path="/ttt" component={TTT}/>
                     <Route path="/Connect4" component={Connect4}/>
+                    <Route path="/Contest" component={Contest}/>
                     {/* Default route in a switch */}
                     <Route><NoPage/></Route>
                 </Switch>    
