@@ -1,7 +1,7 @@
+import Header from "../../components/Header"
 import { useState, useRef, useEffect } from 'react';
 import './Connect4.css'; // Import your CSS file
 import { useGlobalState } from '../../PetClass';
-import { Link } from "wouter";
 
 export default function Connect4() {
     const {name, setName,
@@ -62,11 +62,7 @@ export default function Connect4() {
 
     return (
         <div>
-            <header>
-            <Link href="/">
-                <h1>FantasAI</h1>
-            </Link>
-            </header>
+            <Header/>
             <main>
             <div className="column-div">
                 <div className="left-column">

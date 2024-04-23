@@ -56,7 +56,7 @@ class PetGeneration:
     def augment_prompt(self, initial_description) -> str:
         augmented_prompt = ""
         messages = [
-            {'role': 'system', 'content': "Rewrite the description to be an image prompt for Dall-E. Specify that the image must be in the style of early Disney 2D animated movies, inspired by the style of Fantasia. Specify that no text should be in the image at all. Do not generate a reference sheet. If the subject of the image is an object, anthropomorphize them in in a cartoony way"},
+            {'role': 'system', 'content': "Rewrite the description to be an image prompt for Dall-E. Specify that the image must be in the style of early Disney 2D animated movies, inspired by the style of Fantasia. Specify that no text should be in the image at all. Do not generate a reference sheet. If the subject of the image is an object, anthropomorphize them in a cartoony way"},
             {'role': 'user', 'content': initial_description},
         ]
         
@@ -85,7 +85,7 @@ class PetGeneration:
             model='gpt-3.5-turbo-16k',
             messages=messages,
             temperature=1,
-            max_tokens=500,
+            max_tokens=750,
             top_p=1.0,
             frequency_penalty=0,
             presence_penalty=0
@@ -133,13 +133,6 @@ class PetGeneration:
             style="vivid",  # "vivid" or "natural"
         )
         image = resp.data[0]
-
-        # download the generated image from URL (expires after 60m)
-        # fp = f"pet_generation_images/dalle/{self.make_safe_filename(image.revised_prompt)}"
-        # with open(fp, "wb") as f:
-        #     with self.http.stream("GET", image.url) as r:
-        #         for data in r.iter_bytes():
-        #             f.write(data)
 
         return {image.url}
     
