@@ -4,6 +4,7 @@ import cursedmodron from "../../assets/images/cursedmodron2.png"
 import plasticredpandas from "../../assets/images/plasticredpandas.jpg"
 import pixellink from "../../assets/images/pixellink.png"
 import mushroom from "../../assets/images/mushroom.png"
+import Header from "../../components/Header"
 import { useGlobalState } from '../../PetClass';
 
 import { Link } from "wouter";
@@ -23,11 +24,7 @@ export default function ImageSelect() {
 
     return (
         <div className='h-dvh'>
-            <div className="text-3xl w-full p-5 bg-header">
-                <Link href="/">
-                    <h1>FantasAI</h1>
-                </Link>
-            </div>
+            <Header/>
             <div className="text-3xl w-full p-8 flex flex-col items-center gap-4 h-4/5">
                 <h1 className='text-4xl'>Choose an image</h1>
                 <div className='grid grid-cols-4 grid-rows-2 gap-2'>

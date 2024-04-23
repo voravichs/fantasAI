@@ -1,32 +1,16 @@
 import { useGlobalState } from '../../PetClass';
+import Header from '../../components/Header';
 
 import { TbCameraUp } from "react-icons/tb";
 import { FaArrowAltCircleRight } from "react-icons/fa";
 import { AiOutlineLoading } from "react-icons/ai";
 
 import { useState } from 'react';
-import { Link } from "wouter";
 import { motion } from "framer-motion";
+
 
 export default function PetGen() {
     const {selectedFile} = useGlobalState();
-
-    const pet = {
-        "identity": {
-            "name": "Power-Up",
-            "physical_details": "This virtual pet is a classic red mushroom with a white-spotted cap and a white stalk.",
-            "full_description": "This virtual pet is an adorable and iconic red mushroom with white spots. It is commonly seen in video games as a power-up item, especially in the 'Super Mario' series."
-        },
-        "personality": {
-            "conversationStyle": "Energetic",
-            "talkative": true,
-            "voice": 3,
-            "fav_color": "red",
-            "competitive": false,
-            "likes_sweet": true,
-            "quickly_hungry": false
-        }
-    }
 
     const [description, setDescription] = useState("")
     const [imgLink, setImgLink] = useState("");
@@ -64,11 +48,7 @@ export default function PetGen() {
 
     return (
         <div className='h-dvh'>
-            <div className="text-3xl w-full p-5 bg-header">
-                <Link href="/">
-                    <h1>FantasAI</h1>
-                </Link>
-            </div>
+            <Header/>
             <div className="text-3xl w-full p-4">
                 <button onClick={handleGenerateImage}>Generate</button>
             </div>

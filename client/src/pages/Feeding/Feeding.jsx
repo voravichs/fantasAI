@@ -1,3 +1,5 @@
+import Header from "../../components/Header"
+
 import { useState, useRef, useEffect } from 'react';
 import './Feeding.css'; // Import your CSS file
 import { useGlobalState } from '../../PetClass';
@@ -105,11 +107,7 @@ export default function Feeding() {
 
     return (
         <div>
-            <header>
-            <Link href="/">
-                <h1>FantasAI</h1>
-            </Link>
-            </header>
+            <Header/>
             <main>
                 <h2>Feed Pet</h2>
                 <div>
