@@ -1,3 +1,5 @@
+import Header from "../../components/Header"
+
 import { useState, useRef, useEffect } from 'react';
 import './Chat.css'; // Import your CSS file
 import Modal from 'react-modal'; // Import Modal from react-modal library
@@ -49,9 +51,7 @@ export default function Chat() {
 
     return (
         <div className="App">
-            <header>
-                <h1>FantasAI</h1>
-            </header>
+            <Header/>
             <main>
                 <div className="container">
                     <h2>Frogbert</h2>
