@@ -1,9 +1,9 @@
 import beertower from "../../assets/images/beertower.jpg"
 import redpanda from "../../assets/images/redpanda.jpg"
 import cursedmodron from "../../assets/images/cursedmodron2.png"
-import plasticredpandas from "../../assets/images/plasticredpandas.jpg"
+import scarypepper from "../../assets/images/scarypepper.jpg"
 import pixellink from "../../assets/images/pixellink.png"
-import mushroom from "../../assets/images/mushroom.png"
+import burningelmo from "../../assets/images/burningelmo.jpg"
 import alien from "../../assets/images/alien.png"
 import holyparrot from "../../assets/images/holyparrot.png"
 import bddog from "../../assets/images/bddog.jpg"
@@ -29,9 +29,9 @@ export default function ImageSelect() {
         {src: beertower, alt: "an image of a beer tower"}, 
         {src: redpanda, alt: "an image of a red panda"},
         {src: cursedmodron, alt: "an image of a 3d shape with emoji faces, 3 forks, and 2 emoji feet"},
-        {src: plasticredpandas, alt: "an image of a 3d printed plastic red panda"},
+        {src: scarypepper, alt: "an image of a sliced pepper that looks like a scary face"},
         {src: pixellink, alt: "an image of a blonde pixel character in green garb"},
-        {src: mushroom, alt: "an image of a pixel art mushroom man"},
+        {src: burningelmo, alt: "an image of elmo with his hands up in front of a burning background"},
         {src: alien, alt: "an image of a starfish alien with 6 arms and 4 eyes"},
         {src: holyparrot, alt: "an image of a parrot priest"},
     ]
