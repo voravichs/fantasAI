@@ -20,8 +20,6 @@ export default function Connect4() {
     const [tttVisual, setTTTVisual] = useState(["", "", "", "", "", "", "", "", ""]);
     // const [uploadedImage, setUploadedImage] = useState(null);
 
-    const pet = JSON.parse(localStorage.getItem("currPet"));
-
     // const handleSetupGame = (key) => {
     //     fetch('http://localhost:8000/api/setup_games', {
     //         method: 'POST',
@@ -122,7 +120,6 @@ export default function Connect4() {
                                 : <div></div>}
                             </div>
                         )
-                        
                     })}
                     </div>
                 </div>

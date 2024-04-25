@@ -42,7 +42,7 @@ export default function PetGen() {
             setPetJSON(JSON.parse(data.json))
         })
         .catch(error => {
-            setDescription("Something failed on the backend, please reboot the app!")
+            setDescription("Something failed on the backend, try regenerating or reboot the app!")
             console.error('Error:', error)
 
         });
