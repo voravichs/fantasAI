@@ -83,7 +83,7 @@ export default function PetGen() {
                             : <TbCameraUp/>}
                     </div>
                 </div>
-                <FaArrowAltCircleRight className='text-7xl text-header bg-white rounded-full'/>
+                <FaArrowAltCircleRight className='text-7xl text-yellow-300  rounded-full'/>
                 <div className='col-span-2 p-8 flex-center flex-col gap-2'>
                     <div className='h-[400px] w-[400px] flex-center'>
                         {loading 
