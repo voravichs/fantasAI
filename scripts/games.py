@@ -18,11 +18,12 @@ class Game():
   def get_attributes(self):
     return (self.name, self.physical_details, self.fav_color, self.competitive)
   
-  def set_attributes(self, name, phys, color, compet):
+  def set_attributes(self, name, phys, color, compet, conversationStyle):
     self.name = name
     self.physical_details = phys
     self.fav_color = color
     self.competitive = compet
+    self.conversationStyle = conversationStyle
 
   def talk(self, context, prior=""):
     not_competitive = "" if self.competitive else "not "
@@ -32,6 +33,7 @@ class Game():
         You look like this: {self.physical_details}.
         Your favorite color is {self.fav_color}.
         You are {not_competitive}competitive.
+        Your conversation style is: {self.conversationStyle}.
         Rewrite the following text in a style matching your personality and include personal details when appropriate."""
       
       messages=[
@@ -48,7 +50,8 @@ class Game():
       personality = f"""You are a friendly tamagochi-like pet named {self.name}.
         You look like this: {self.physical_details}.
         Your favorite color is {self.fav_color}.
-        You are {not_competitive}competitive.
+        You are {not_competitive} competitive.
+        Your conversation style is: {self.conversationStyle}.
         The first statement you must respond to. The second statement you must rewrite.
         Rewrite the assistant text in a style matching your personality and include personal details when appropriate.
         Make sure to respond to what the user said as well."""

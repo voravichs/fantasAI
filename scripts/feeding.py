@@ -27,17 +27,36 @@ class FeedPetAction:
     #             os.environ["HELICONE_API_KEY"] = getpass("Please enter your Helicone API Key now: ")
     #     return
 
-    def load_personality(self, talkative, conversation_style, likes_sweet):
+    # def load_personality(self, talkative, conversation_style, likes_sweet):
 
-      if talkative:
+    #   if talkative:
+    #       words_used = 80
+    #   else:
+    #       words_used = 30
+
+    #   personality = f"""You are a talking pet. Each of your speech contains around {words_used} words.
+    #   In terms of food preferences, you like sweet food: {likes_sweet}, and you like savory food: {not likes_sweet}
+    #   Speak in a manner way that has a {conversation_style} vibe. Be cute overall.
+
+    #   """
+
+    #   self.memory.append({"role": "system", "content": personality})
+  
+    def load_personality(self, pet="default"):
+      if pet.get("personality").get("talktative"):
           words_used = 80
       else:
           words_used = 30
 
-      personality = f"""You are a talking pet. Each of your speech contains around {words_used} words.
-      In terms of food preferences, you like sweet food: {likes_sweet}, and you like savory food: {not likes_sweet}
-      Speak in a manner way that has a {conversation_style} vibe. Be cute overall.
-      """
+      if pet == "default":
+        personality = """You are a friendly tamagochi-like pet."""
+      else:
+        personality = f"""You are a tamagochi-like pet named {pet.get("identity").get("name")}.
+        You look like this: {pet.get("identity").get("physical_details")}.
+        Each time you speak, you can only use: {words_used} words.
+        Your favorite color is {pet.get("personality").get("fav_color")}.
+        Your conversation style is {pet.get("personality").get("conversationStyle")}.
+        In terms of food preferences, you like sweet food: {pet.get("personality").get("likes_sweet")}, and you like savory food: {not pet.get("personality").get("likes_sweet")}"""
 
       self.memory.append({"role": "system", "content": personality})
   
@@ -81,37 +100,37 @@ class FeedPetAction:
 
     def pet_answer(self, nature, fav_food, food_choice, talkative, conversation_style, describe, likes_sweet):
           
-          self.load_personality(talkative, conversation_style, likes_sweet)
-          
-          self.memory.append({"role": "user", "content": describe})
-          if talkative:
-            max_tokens = 300
-          else:
-            max_tokens = 100
+      # self.load_personality(talkative, conversation_style, likes_sweet)
+      
+      self.memory.append({"role": "user", "content": describe})
+      if talkative:
+        max_tokens = 300
+      else:
+        max_tokens = 100
 
-          if nature == "full":
-            content = f" You are too full to eat so you rejected your owner's {food_choice}. Reply in pet language in first-person converstion style."
-          elif nature == "thank":
-            content = f" Your owner fed you {food_choice} and you ate it. It is your favorite food: it {fav_food}. Thank your owner in pet language in first-person converstion style."
-          elif nature == "rotten":
-            content = f" Your owner fed you {food_choice} and you ate it. It is rotten food. You reply that you ate it but are angry in pet language in first-person converstion style."
+      if nature == "full":
+        content = f" You are too full to eat so you rejected your owner's {food_choice}. Reply in pet language in first-person converstion style."
+      elif nature == "thank":
+        content = f" Your owner fed you {food_choice} and you ate it. It is your favorite food: it {fav_food}. Thank your owner in pet language in first-person converstion style."
+      elif nature == "rotten":
+        content = f" Your owner fed you {food_choice} and you ate it. It is rotten food. You reply that you ate it but are angry in pet language in first-person converstion style."
 
-          response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=self.memory + [
-              {
-                "role": "user",
-                "content": content
-              },
-            ],
-            temperature=1,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-          )
-          self.memory.append({"role": "assistant", "content": response.choices[0].message.content})
-          return response.choices[0].message.content
+      response = self.client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        messages=self.memory + [
+          {
+            "role": "user",
+            "content": content
+          },
+        ],
+        temperature=1,
+        max_tokens=max_tokens,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+      )
+      self.memory.append({"role": "assistant", "content": response.choices[0].message.content})
+      return response.choices[0].message.content
 
     def pet_too_full_answer(self, fav_food, food_choice, talkative, conversation_style, describe, likes_sweet):
           
@@ -126,7 +145,7 @@ class FeedPetAction:
           content = f" You are too full to eat so you rejected your owner's {food_choice}. Reply in pet language in first-person converstion style."
           
           response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-1106-preview",
             messages=self.memory + [
               {
                 "role": "user",
@@ -144,10 +163,10 @@ class FeedPetAction:
 
     def talk_to_pet(self, description, likes_sweet, talkative, conversation_style):
       
-      self.load_personality(talkative, conversation_style, likes_sweet)
+      # self.load_personality(talkative, conversation_style, likes_sweet)
 
       response = self.client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-1106-preview",
         messages= self.memory + [
           {
             "role": "user",

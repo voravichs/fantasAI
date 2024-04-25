@@ -13,6 +13,8 @@ export default function Chat() {
     const [modalIsOpen, setModalIsOpen] = useState(false); // State to manage modal open/close
     const conversationRef = useRef(null);
 
+    const pet = JSON.parse(localStorage.getItem("currPet"));
+
     useEffect(() => {
         conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
     }, [conversation]);
@@ -37,10 +39,10 @@ export default function Chat() {
         .catch(error => console.error('Error:', error));
     };
 
-    const handleImageUpload = (event) => {
-        const file = event.target.files[0];
-        setUploadedImage(file);
-    };
+    // const handleImageUpload = (event) => {
+    //     const file = event.target.files[0];
+    //     setUploadedImage(file);
+    // };
 
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
@@ -53,28 +55,34 @@ export default function Chat() {
         <div className="App">
             <Header/>
             <main>
-                <div className="container">
-                    <h2>Frogbert</h2>
-                    <img src={uploadedImage ? URL.createObjectURL(uploadedImage) : '/Frog.gif'} alt="Pet" className="pet-image" />
-                    <div className="conversation" ref={conversationRef}>
-                        {conversation.map((message, index) => (
-                            <div key={index} className={`message ${message.role}`}>
-                                {message.content}
-                            </div>
-                        ))}
+                <div className="flex flex-col gap-8">
+                    <div className="flex-center gap-8">
+                        <div className="flex flex-col items-center">
+                            <h2 className="text-2xl font-bold">{pet.identity.name}</h2>
+                            <img className="h-[400px] w-[400px]" src={localStorage.getItem("currImg")} alt="Pet"/>
+                        </div>
+                        <div className="conversation w-1/3" ref={conversationRef}>
+                            {conversation.map((message, index) => (
+                                <div key={index} className={`message ${message.role}`}>
+                                    {message.content}
+                                </div>
+                            ))}
+                        </div>
                     </div>
+                    
                     <div className="input-group">
-                        <label htmlFor="description">Enter your prompt:</label>
+                        <label className="text-xl" htmlFor="description">Chat with {pet.identity.name}!</label>
                         <textarea
                             id="description"
                             rows="2"
                             value={userDescription}
                             onChange={(e) => setUserDescription(e.target.value)}
                             onKeyDown={handleKeyPress} // Call handleKeyPress on key down event
+                            className="w-1/2"
                         ></textarea>
-                        <button id="generate-btn" onClick={handleGenerateMeditation}>Generate Pet Response</button>
+                        <button id="generate-btn" onClick={handleGenerateMeditation}>Submit</button>
                     </div>
-                    <button onClick={() => setModalIsOpen(true)}>Create New Pet</button>
+                    {/* <button onClick={() => setModalIsOpen(true)}>Create New Pet</button>
                     <Modal
                         isOpen={modalIsOpen}
                         onRequestClose={() => setModalIsOpen(false)}
@@ -84,7 +92,7 @@ export default function Chat() {
                         <h2>Upload Your Pet's Image</h2>
                         <input type="file" accept="image/*" onChange={handleImageUpload} />
                         <button onClick={() => setModalIsOpen(false)}>Done</button>
-                    </Modal>
+                    </Modal> */}
                 </div>
             </main>
         </div>

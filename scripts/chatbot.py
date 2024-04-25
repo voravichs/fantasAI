@@ -6,21 +6,28 @@ from dotenv import load_dotenv
 from getpass import getpass
 
 class Chatbot:
-    def __init__(self, pet="default"):
-        self.pet = pet
+    def __init__(self):
+        # self.pet = pet
         self.pick_random_voice()
         load_dotenv()
         self.client = openai.OpenAI(base_url="https://oai.hconeai.com/v1", api_key=os.getenv('HELICONE_API_KEY'))
         self.memory = []
-        self.load_personality()
+        # self.load_personality()
 
-    def load_personality(self):
-        if self.pet == "default":
+    def load_personality(self, pet="default"):
+        if pet.get("personality").get("talktative"):
+            words_used = 150
+        else:
+            words_used = 50
+        
+        if pet == "default":
             personality = """You are a friendly tamagochi-like pet."""
         else:
-            personality = f"""You are a friendly tamagochi-like pet named {self.pet.identity.name}.
-            You look like this: {self.pet.identity.physical_details}.
-            Your favorite color is {self.pet.personality.fav_color}."""
+            personality = f"""You are a tamagochi-like pet named {pet.get("identity").get("name")}.
+            You look like this: {pet.get("identity").get("physical_details")}.
+            Each time you speak, you can only use: {words_used} words.
+            Your favorite color is {pet.get("personality").get("fav_color")}.
+            Your conversation style is {pet.get("personality").get("conversationStyle")}."""
 
         self.memory.append({"role": "system", "content": personality})
 
@@ -75,7 +82,7 @@ class Chatbot:
 
     def amnesia(self):
         self.memory.pop()
-        self.load_personality()
+        # self.load_personality()
         return
     
     def run_once(self):

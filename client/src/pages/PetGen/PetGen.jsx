@@ -7,7 +7,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 
 import { useState } from 'react';
 import { motion } from "framer-motion";
-
+import { useLocation } from 'wouter';
 
 export default function PetGen() {
     const {selectedFile} = useGlobalState();
@@ -16,6 +16,8 @@ export default function PetGen() {
     const [imgLink, setImgLink] = useState("");
     const [petJSON, setPetJSON] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    const [location, navigate] = useLocation();
 
     const handleGenerateImage = () => {
         setImgLink("")
@@ -38,14 +40,31 @@ export default function PetGen() {
             setLoading(false);
             setImgLink(data.link)
             setPetJSON(JSON.parse(data.json))
-            console.log(JSON.parse(data.json))
         })
         .catch(error => {
-            setDescription("Something failed on the backend, please reboot the app!")
+            setDescription("Something failed on the backend, try regenerating or reboot the app!")
             console.error('Error:', error)
 
         });
     };
+
+    const handleLoadPet = () => {
+        fetch('http://localhost:8000/api/pet_load_chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ pet: petJSON })
+        })
+        .catch(error => console.error('Error:', error));
+    };
+
+    const handleSavePet = () => {
+        console.log(JSON.stringify(petJSON))
+        handleLoadPet()
+        localStorage.setItem("currImg", imgLink)
+        localStorage.setItem("currPet", JSON.stringify(petJSON))
+    }
 
     return (
         <div className='h-dvh'>
@@ -106,7 +125,16 @@ export default function PetGen() {
                 </div>
             </div>
             {imgLink
-                ? <button className='text-3xl' onClick={() => console.log(JSON.stringify(petJSON))}>Save</button>
+                ? 
+                <button 
+                    className='text-3xl' 
+                    onClick={() => {
+                        handleSavePet()
+                        navigate("/")
+                    }}
+                >
+                    Save
+                </button>
                 : null}
            
         </div>

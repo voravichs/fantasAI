@@ -8,6 +8,7 @@ import TTT from "./Game/TTT"
 import Contest from "./Game/Contest"
 import Connect4 from "./Game/Connect4"
 import ImageSelect from "./PetGen/ImageSelect"
+import PetDetails from "./PetDetails"
 
 export {
     Feeding,
@@ -19,5 +20,6 @@ export {
     TTT,
     Connect4,
     ImageSelect,
-    Contest
+    Contest,
+    PetDetails
 }

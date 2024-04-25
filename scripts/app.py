@@ -196,6 +196,7 @@ def generate_food_options():
 def generate_feed_pet():
 
     data = request.json
+    name = data.get("name")
     food_choice = data.get("food")
     food_type = data.get("food_type")
     hunger_level = data.get('hunger_level')
@@ -244,6 +245,28 @@ def generate_meditation():
 
     # Render the index.html template with the response
     return jsonify({"petText": answer})
+
+@app.route('/api/pet_load_chat', methods=['POST'])
+def load_pet_for_chat():
+    data = request.json
+    pet = data.get('pet')
+        
+    chatbot.load_personality(pet)
+    feedPetAction.load_personality(pet)
+    ttt.set_attributes(
+        pet.get("identity").get("name"), 
+        pet.get("identity").get("physical_details"), 
+        pet.get("personality").get("fav_color"), 
+        pet.get("personality").get("competitive"),
+        pet.get("personality").get("conversationStyle"))
+    connect4.set_attributes(
+        pet.get("identity").get("name"), 
+        pet.get("identity").get("physical_details"), 
+        pet.get("personality").get("fav_color"), 
+        pet.get("personality").get("competitive"),
+        pet.get("personality").get("conversationStyle"))
+    
+    return jsonify({"response": "good"})
 
 def play_audio_async(answer, voice="random"):
     # Turn the response into audio and then play it

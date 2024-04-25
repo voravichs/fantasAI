@@ -3,7 +3,7 @@ import Header from "../../components/Header"
 import { useState, useRef, useEffect } from 'react';
 import './Feeding.css'; // Import your CSS file
 import { useGlobalState } from '../../PetClass';
-import { Link } from "wouter";
+// import { Link } from "wouter";
 
 export default function Feeding() {
     
@@ -14,11 +14,13 @@ export default function Feeding() {
         talkative,
         likesSweet } = useGlobalState();
 
+    const pet = JSON.parse(localStorage.getItem("currPet"));
+
     const [userDescription, setUserDescription] = useState('');
     const [conversation, setConversation] = useState([]);
     const [foodOptions, setFoodOptions] = useState({});
     const [foodTypeOptions, setFoodTypeOptions] = useState({});
-    const [uploadedImage, setUploadedImage] = useState(null);
+    // const [uploadedImage, setUploadedImage] = useState(null);
     const conversationRef = useRef(null);
 
     useEffect(() => {
@@ -58,10 +60,11 @@ export default function Feeding() {
                 food: key, 
                 hunger_level: hunger, 
                 happiness_level: happiness, 
-                likes_sweet: likesSweet, 
+                likes_sweet: pet.personality.likes_sweet, 
                 food_type: curFoodType,
-                conversationStyle: conversationStyle,
-                talkative: talkative,
+                conversationStyle: pet.personality.conversationStyle,
+                talkative: pet.personality.talkative,
+                name: pet.identity.name
              })
         })
         .then(response => response.json())
@@ -92,7 +95,7 @@ export default function Feeding() {
             const newConversation = [...conversation, { role: 'pet', content: data.answer }];
             setConversation(newConversation);
             setUserDescription('');
-            setModalIsOpen(false); // Close the modal after generating pet response
+            // setModalIsOpen(false); // Close the modal after generating pet response
         })
         .catch(error => console.error('Error:', error));
     };
@@ -109,14 +112,13 @@ export default function Feeding() {
         <div>
             <Header/>
             <main>
-                <h2>Feed Pet</h2>
+                <h2 className="text-2xl">Feed Pet</h2>
                 <div>
-                   
                    <div className="column-div">
                     <div className="left-column">
                         <div className = "pet-details">
-                        <div>
-                            <img src={uploadedImage ? URL.createObjectURL(uploadedImage) : '/Frog.gif'} alt="Pet" className="pet-image" />
+                        <div className="flex flex-col items-center">
+                            <img className="h-[400px] w-[400px]" src={localStorage.getItem("currImg")} alt="Pet"/>
                         </div>
                         <div  ref={conversationRef}>
                             <div className="pet-stats">

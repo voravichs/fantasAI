@@ -5,13 +5,9 @@ import { useGlobalState } from '../PetClass';
 
 export default function HomePage() {
 
-    const {name, setName,
-        cheerful, setCheerful,
-        talkative, setTalkative,
-        quicklyHungry, setQuicklyHungry,
-        happiness, setHappiness, 
-        hunger, setHunger, 
-        likesSweet, setLikesSweet} = useGlobalState();
+    const {happiness, hunger} = useGlobalState();
+
+    const pet = JSON.parse(localStorage.getItem("currPet"));
 
     const container = {
         hidden: { opacity: 0 },
@@ -34,10 +30,9 @@ export default function HomePage() {
         show: { scale: [0, 1.1, 1], top: [100,  30, 30] },
     }
 
-
     return (
         <>
-            <div className="h-dvh flex-center flex-col gap-8">
+            <div className="h-dvh flex-center flex-col gap-8 relative">
                 <motion.div 
                     variants={container}
                     initial="hidden"
@@ -67,10 +62,25 @@ export default function HomePage() {
                         <button className="text-4xl py-4 px-8">Games</button>
                     </Link>
                 </div>
-
-                <div>
-                    {hunger > 10 ? "Pet feeling hungry" : ""}
+                {pet && 
+                <div className="absolute bottom-0 bg-header rounded-lg w-3/4 h-1/4 mb-8 flex">
+                    <img className="h-full rounded-l-lg border-r-2" src={localStorage.getItem("currImg")}/>
+                    <div className="w-full text-left p-8">
+                        <div className="flex gap-8">
+                            <p className="font-bold text-2xl text-yellow-300">{pet.identity.name}</p>
+                            <p className="font-bold text-2xl text-yellow-300">Hunger: {hunger}</p>
+                            <p className="font-bold text-2xl text-yellow-300">Happiness: {happiness}</p>
+                        </div>
+                        <p>{pet.identity.full_description}</p>
+                        {hunger > 10 
+                            ? <p className="text-xl">
+                                {pet.identity.name} is feeling hungry!
+                            </p> 
+                            : ""}
+                    </div>
                 </div>
+                }
+                
                 
             </div>
             
