@@ -134,7 +134,7 @@ class FeedPetAction:
 
     def pet_too_full_answer(self, fav_food, food_choice, talkative, conversation_style, describe, likes_sweet):
           
-          self.load_personality(talkative, conversation_style, likes_sweet)
+          # self.load_personality(talkative, conversation_style, likes_sweet)
           
           self.memory.append({"role": "user", "content": describe})
           if talkative:
@@ -142,7 +142,7 @@ class FeedPetAction:
           else:
             max_tokens = 100
 
-          content = f" You are too full to eat so you rejected your owner's {food_choice}. Reply in pet language in first-person converstion style."
+          content = f" You are too full to eat so you rejected your owner's {food_choice}. Reply in first-person converstion style."
           
           response = self.client.chat.completions.create(
             model="gpt-4-1106-preview",
