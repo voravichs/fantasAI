@@ -1,37 +1,43 @@
 import Header from "../../components/Header"
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './TTT.css'; // Import your CSS file
-import { useGlobalState } from '../../PetClass';
-import { Link } from "wouter";
+
+import { FaCircleDot } from "react-icons/fa6";
+import { IoClose } from "react-icons/io5";
+// import { useGlobalState } from '../../PetClass';
+// import { Link } from "wouter";
 
 export default function Connect4() {
-    const {name, setName,
-        competitive, setCompetitive,
-        physical, setPhysical,
-        favColor, setFavColor} = useGlobalState();
+    // const {name, setName,
+    //     competitive, setCompetitive,
+    //     physical, setPhysical,
+    //     favColor, setFavColor} = useGlobalState();
 
     const [board, setBoard] = useState([[0,0,0], [0,0,0], [0,0,0]])
     const [response, setResponse] = useState("Let's Play Tic Tac Toe!")
     const [move, setMove] = useState('');
-    const [uploadedImage, setUploadedImage] = useState(null);
+    const [tttVisual, setTTTVisual] = useState(["", "", "", "", "", "", "", "", ""]);
+    // const [uploadedImage, setUploadedImage] = useState(null);
 
-    const handleSetupGame = (key) => {
-        fetch('http://localhost:8000/api/setup_games', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                name: name,
-                physical_details: physical,
-                fav_color: favColor,
-                competitive: competitive
-             })
-        })
-        .then(response => response.json())
-        .catch(error => console.error('Error:', error));
-    };
+    const pet = JSON.parse(localStorage.getItem("currPet"));
+
+    // const handleSetupGame = (key) => {
+    //     fetch('http://localhost:8000/api/setup_games', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ 
+    //             name: name,
+    //             physical_details: physical,
+    //             fav_color: favColor,
+    //             competitive: competitive
+    //          })
+    //     })
+    //     .then(response => response.json())
+    //     .catch(error => console.error('Error:', error));
+    // };
     
     const handleMakeTTTBoard = (key) => {
         setResponse("Ok, Let's start a new game!")
@@ -66,17 +72,34 @@ export default function Connect4() {
         })
         .catch(error => console.error('Error:', error));
     };
-    
+
+    useEffect(() => {
+        let tttArray = [];
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                if (board[i][j] === 1) {
+                    tttArray.push(<FaCircleDot/>)
+                } else if (board[i][j] === -1) {
+                    tttArray.push(<IoClose/>)
+                } else {
+                    tttArray.push("")
+                }
+            }
+        }
+        setTTTVisual(tttArray)
+    }, [board]);
 
     return (
-        <div onLoad={handleSetupGame}>
+        <div>
             <Header/>
             <main>
             <div className="column-div">
                 <div className="left-column">
-                    <div>
-                        <img src={uploadedImage ? URL.createObjectURL(uploadedImage) : '/Frog.gif'} alt="Pet" className="pet-image" />
-                        <p>{response}</p>
+                    <div className="mb-8">
+                        <div className="flex flex-col items-center">
+                            <img className="h-[400px] w-[400px]" src={localStorage.getItem("currImg")} alt="Pet"/>
+                        </div>
+                        <p className="text-yellow-300 italic">{response}</p>
                     </div>
                     <button id="generate-btn" onClick={handleMakeTTTBoard}>Start a New Game</button>
                     <label htmlFor="next_move">Type where you want to make a move</label>
@@ -89,16 +112,19 @@ export default function Connect4() {
                     <button id="generate-btn" onClick={handleMakeTTTMove}>Make Your Move</button>
                 </div>
 
-                <div className="right-column">
-                    <p>
-                        {board[0][0]}{board[0][1]}{board[0][2]}
-                    </p>
-                    <p>
-                        {board[1][0]}{board[1][1]}{board[1][2]}
-                    </p>
-                    <p>
-                        {board[2][0]}{board[2][1]}{board[2][2]}
-                    </p>
+                <div className="right-column flex-center flex-col">
+                    <div className="w-1/2 h-1/2 grid grid-cols-3 grid-rows-3 items-center">
+                    {tttVisual.map((item, index) => {
+                        return (
+                            <div className="flex-center text-6xl border h-full" key={index}>
+                                {item 
+                                ? <div>{item}</div>
+                                : <div></div>}
+                            </div>
+                        )
+                        
+                    })}
+                    </div>
                 </div>
 
             </div>

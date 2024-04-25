@@ -56,7 +56,7 @@ class PetGeneration:
     def augment_prompt(self, initial_description) -> str:
         augmented_prompt = ""
         messages = [
-            {'role': 'system', 'content': "Rewrite the description to be an image prompt for Dall-E. Specify that the image must be in the style of early Disney 2D animated movies, inspired by the style of Fantasia. Specify that no text should be in the image at all. Do not generate a reference sheet. If the subject of the image is an object, anthropomorphize them in a cartoony way"},
+            {'role': 'system', 'content': "Rewrite the description to be an image prompt for Dall-E. Specify that the image must be in the style of early Disney 2D animated movies, inspired by the style of Fantasia. Specify that no text should be in the image at all. Do not generate a reference sheet. If the subject of the image is an object, anthropomorphize them in a cartoony way."},
             {'role': 'user', 'content': initial_description},
         ]
         
@@ -77,7 +77,7 @@ class PetGeneration:
     # Generate a JSON from the image description
     def generate_json(self, desc):
         messages = [
-            {'role': 'system', "content": "You are an assistant to generate JSONs of imaginary virtual pets. Given a description of an image, imagine the subject of the image as a virtual pet with a certain personality. Try to anthropomorphize the pet in a cartoon-like manner. Use the following format, and return the result as a JSON string:\npet = {\n    \"identity\": {\n        \"name\": str (a proper noun, give a new name if a name is not mentioned),\n        \"physical_details\": str (a description of the main subject of the image),\n        \"full_description:\" str (A paraphrased description of the prompt)\n    },\n    \"personality\": {\n      \"conversationStyle\": str (lowercase, some personality type or archetype to describe their personality when they are speaking),\n      \"talkative\": true/false,\n      \"voice\": int from 0 - 6,\n      \"fav_color\": str (choose one of the common colors, red, green, yellow, orange, violet),\n      \"competitive\": true/false,\n      \"likes_sweet\": true/false,\n      \"quickly_hungry\": true/false,\n    }\n}"},
+            {'role': 'system', "content": "You are an assistant to generate JSONs of imaginary virtual pets. Given a description of an image, imagine the subject of the image as a virtual pet with a certain personality. Try to anthropomorphize the pet in a cartoon-like manner. Use the following format, and return the result as a JSON string:\npet = {\n    \"identity\": {\n        \"name\": str (a proper noun, give a new name if a name is not mentioned, give them a new name if the description describes an already existing character),\n        \"physical_details\": str (a description of the main subject of the image, limit to 1 sentence or phrase to describe it),\n        \"full_description:\" str (write a description to describe a virtual pet that would be generated from the original prompt)\n    },\n    \"personality\": {\n      \"conversationStyle\": str (lowercase, some personality type or archetype to describe their personality when they are speaking),\n      \"talkative\": true/false,\n      \"voice\": int from 0 - 6,\n      \"fav_color\": str (choose one of the common colors, red, green, yellow, orange, violet),\n      \"competitive\": true/false,\n      \"likes_sweet\": true/false,\n      \"quickly_hungry\": true/false,\n    }\n}\nHave an equal chance of generating conversation styles that are positive or negative. For instance, a pet can be mean or sarcastic if the description fits it. Avoid common conversation styles like cheerful, or energetic, use more specific and varied words."},
             {'role': 'user', 'content': desc}  
         ] 
         
@@ -138,8 +138,8 @@ class PetGeneration:
     
 if __name__ == '__main__':
     petGen = PetGeneration()
-    description = petGen.describe_image('src/assets/images/redpanda.jpg')
-    json_prompt = petGen.generate_json(description)
-    augmented_prompt = petGen.augment_prompt(json_prompt)
-    img_link = petGen.generate_image_link(augmented_prompt)
-    print(img_link)
+    description = petGen.describe_image('src/assets/images/burningelmo.jpg')
+    # json_prompt = petGen.generate_json(description)
+    # augmented_prompt = petGen.augment_prompt(json_prompt)
+    # img_link = petGen.generate_image_link(augmented_prompt)
+    print(description)

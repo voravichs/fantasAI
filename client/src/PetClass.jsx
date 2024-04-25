@@ -12,6 +12,9 @@ export const PetClass = ({ children }) => {
   // Selected File
   const [selectedFile, setSelectedFile] = useState("")
 
+  // PetJSON
+  const [pet, setPet] = useState(null);
+
   // name and physical
   const [name, setName] = useState("Mr Whiskers");
   const [physical, setPhysical] = useState("A colorful basketball");
