@@ -119,7 +119,7 @@ def move_ttt():
                     ttt.perform_move(move[0], move[1], -1)
                 
                 if ttt.has_winner() == 1:
-                    response = ttt.talk('The game is over! You won!')
+                    response = ttt.talk('The game is over! I lost!')
                 elif ttt.has_winner() == -1:
                     response = ttt.talk('The game is over! I won!')
                 else:
@@ -160,7 +160,7 @@ def move_c4():
                     connect4.perform_move(int(move), -1)
                 
                 if connect4.has_winner() == 1:
-                    response = connect4.talk('The game is over! You won!')
+                    response = connect4.talk('The game is over! I lost!')
                 elif connect4.has_winner() == -1:
                     response = connect4.talk('The game is over! I won!')
                 else:
