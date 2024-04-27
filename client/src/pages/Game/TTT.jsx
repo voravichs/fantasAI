@@ -5,37 +5,13 @@ import './TTT.css'; // Import your CSS file
 
 import { FaCircleDot } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
-// import { useGlobalState } from '../../PetClass';
-// import { Link } from "wouter";
 
 export default function Connect4() {
-    // const {name, setName,
-    //     competitive, setCompetitive,
-    //     physical, setPhysical,
-    //     favColor, setFavColor} = useGlobalState();
 
     const [board, setBoard] = useState([[0,0,0], [0,0,0], [0,0,0]])
     const [response, setResponse] = useState("Let's Play Tic Tac Toe!")
     const [move, setMove] = useState('');
     const [tttVisual, setTTTVisual] = useState(["", "", "", "", "", "", "", "", ""]);
-    // const [uploadedImage, setUploadedImage] = useState(null);
-
-    // const handleSetupGame = (key) => {
-    //     fetch('http://localhost:8000/api/setup_games', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ 
-    //             name: name,
-    //             physical_details: physical,
-    //             fav_color: favColor,
-    //             competitive: competitive
-    //          })
-    //     })
-    //     .then(response => response.json())
-    //     .catch(error => console.error('Error:', error));
-    // };
     
     const handleMakeTTTBoard = (key) => {
         setResponse("Ok, Let's start a new game!")

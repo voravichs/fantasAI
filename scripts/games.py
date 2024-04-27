@@ -14,6 +14,7 @@ class Game():
     self.physical_details = ""
     self.fav_color = ""
     self.competitive = True
+    self.conversationStyle = ""
 
   def get_attributes(self):
     return (self.name, self.physical_details, self.fav_color, self.competitive)
@@ -386,6 +387,16 @@ class MagicContest(Game):
 
     def __init__(self):
       super().__init__()
+      self.name = ""
+      self.physical_details = ""
+      self.fav_color = ""
+      self.talkative = True
+      self.competitive = True
+      self.quicklyHungry = True
+      self.likesSweet = True
+      self.happiness = 0
+      self.hunger = 0
+      self.conversationStyle = ""
       self.set_energy(100)
       self.goal = 100
       self.reset()
@@ -449,7 +460,7 @@ class MagicContest(Game):
     def get_phase(self):
       return self.phase
 
-    def set_attributes(self, name, phys, color, talk, compet, hunger_speed, sweets, happiness, hunger):
+    def set_attributes(self, name, phys, color, talk, compet, hunger_speed, sweets, happiness, hunger, conversation):
       self.name = name
       self.physical_details = phys
       self.fav_color = color
@@ -459,10 +470,11 @@ class MagicContest(Game):
       self.likesSweet = sweets
       self.happiness = happiness
       self.hunger = hunger
+      self.conversationStyle = conversation
 
     def get_attributes(self):
       return (self.name, self.physical_details, self.fav_color, self.talkative, 
-              self.competitive, self.quicklyHungry, self.likesSweet, self.happiness, self.hunger)
+              self.competitive, self.quicklyHungry, self.likesSweet, self.happiness, self.hunger, self.conversationStyle)
 
     def has_won(self):
       return self.points >= self.goal
@@ -604,6 +616,7 @@ class MagicContest(Game):
         They are {not_competitive}competitive.
         They are {not_talkative}talkative.
         They like {foods} foods.
+        Your conversation style is: {self.conversationStyle}.
         Rewrite the following series of events as specified."""
       
       user_prompt = ""
@@ -642,6 +655,7 @@ class MagicContest(Game):
         You are {not_competitive}competitive.
         You are {not_talkative}talkative.
         You like {foods} foods.
+        Your conversation style is: {self.conversationStyle}.
         You are currently in a magical talent show. Your friend is advising you on how to perform. They have asked
         you a question and you are to respond to their question.
         If they ask about what move they should choose, you should hint and not directly state the following

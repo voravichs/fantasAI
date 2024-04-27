@@ -41,33 +41,6 @@ def generate_image():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route('/api/setup_games', methods=['POST'])
-def setup_games():
-    data = request.json
-    name = data.get("name")
-    physical_details = data.get("physical_details")
-    fav_color = data.get("fav_color")
-    competitive = data.get("competitive")
-    ttt.set_attributes(name, physical_details, fav_color, competitive)
-    connect4.set_attributes(name, physical_details, fav_color, competitive)
-    return ""
-
-@app.route('/api/setup_contest', methods=['POST'])
-def setup_contest():
-    data = request.json
-    name = data.get("name")
-    physical_details = data.get("physical_details")
-    fav_color = data.get("fav_color")
-    talkative = data.get("talkative")
-    competitive = data.get("competitive")
-    quicklyHungry = data.get("quicklyHungry")
-    likesSweet = data.get("likesSweet")
-    happiness = data.get("happiness")
-    hunger = data.get("hunger")
-    contest.set_attributes(name, physical_details, fav_color, talkative, competitive, quicklyHungry, likesSweet, happiness, hunger)
-    contest.set_energy(100-(2*hunger))
-    return jsonify({"maxEnergy" : contest.get_energy()[0], "currEnergy" : contest.get_energy()[1]})
-
 @app.route('/api/new_ttt', methods=['POST'])
 def new_ttt():
     ttt.reset()
@@ -81,7 +54,10 @@ def new_c4():
 @app.route('/api/new_contest', methods=['POST'])
 def new_contest():
     contest.reset()
-    return jsonify({"currEnergy" : contest.get_energy()[1]})  
+    data = request.json
+    hunger = data.get("hunger")
+    contest.set_energy(100-(2*hunger))
+    return jsonify({"maxEnergy" : contest.get_energy()[0], "currEnergy" : contest.get_energy()[1]})  
 
 @app.route('/api/get_ttt', methods=['POST'])
 def get_ttt():
@@ -189,6 +165,7 @@ def contest_moves():
     ret_dict['m3Num'] = key_list[2]
     ret_dict['m3Name'] = moves[key_list[2]][0]
     ret_dict['m3Desc'] = moves[key_list[2]][1]
+
     return jsonify(ret_dict)
 
 @app.route('/api/contest_pet_talk', methods=['POST'])
@@ -196,8 +173,10 @@ def pet_talk():
     data = request.json
     user_prompt = data.get("discussion")
     moves = [data.get("m1Num"), data.get("m2Num"), data.get("m3Num")]
+    color_select = data.get("colorSelect")
+    num_convo = data.get("numTalks")
 
-    return jsonify({"response": contest.advise_player(user_prompt, moves)})
+    return jsonify({"response": contest.advise_player(user_prompt, moves, color_select, num_convo)})
 
 @app.route('/api/run_contest', methods=['POST'])
 def run_contest():
@@ -315,6 +294,18 @@ def load_pet_for_chat():
         pet.get("personality").get("fav_color"), 
         pet.get("personality").get("competitive"),
         pet.get("personality").get("conversationStyle"))
+    
+    contest.set_attributes(
+        pet.get("identity").get("name"), 
+        pet.get("identity").get("physical_details"), 
+        pet.get("personality").get("fav_color"), 
+        pet.get("personality").get("talkative"),
+        pet.get("personality").get("competitive"),
+        pet.get("personality").get("quicklyHungry"),
+        pet.get("personality").get("likesSweet"),
+        pet.get("personality").get("happiness"),
+        pet.get("personality").get("conversationStyle")
+    )
     
     return jsonify({"response": "good"})
 
