@@ -399,7 +399,6 @@ class MagicContest(Game):
       self.conversationStyle = ""
       self.set_energy(100)
       self.goal = 100
-      self.reset()
       '''
         0 : 1.5 multiplier if correct color
         1 : All point gains are negative & goal = -70
@@ -437,19 +436,29 @@ class MagicContest(Game):
                            1 : ("One Last Push", "Have your pet expend all their energy for a final magical performance."),
                            2 : ("Encore", "Have your pet perform another main performance instead of a closer")
                          }
+      
+      self.curr_moves = self.opener_moves
+      self.reset()
 
     def reset(self):
       self.phase = 0
       self.points = 0
+      self.goal = 100
       self.curr_energy = self.max_energy
       self.multiplier = 1
       self.go_to_main = False
       self.closer = True
       self.moves = []
+      self.curr_moves = self.opener_moves
 
     def set_energy(self, max_energy):
       self.max_energy = max_energy
       self.curr_energy = max_energy
+
+    def use_energy(self, energy_spent):
+      self.curr_energy -= energy_spent
+      if self.curr_energy < 0:
+        self.curr_energy = 0
 
     def get_energy(self):
       return (self.max_energy, self.curr_energy)
@@ -459,6 +468,15 @@ class MagicContest(Game):
 
     def get_phase(self):
       return self.phase
+    
+    def get_points(self):
+      return self.points
+    
+    def get_goal(self):
+      return self.goal
+    
+    def get_multiplier(self):
+      return self.multiplier
 
     def set_attributes(self, name, phys, color, talk, compet, hunger_speed, sweets, happiness, hunger, conversation):
       self.name = name
@@ -477,21 +495,17 @@ class MagicContest(Game):
               self.competitive, self.quicklyHungry, self.likesSweet, self.happiness, self.hunger, self.conversationStyle)
 
     def has_won(self):
-      return self.points >= self.goal
+      return self.points >= self.goal if self.goal > 0 else self.points <= self.goal
     
-    def get_move_choices(self):
-      if self.phase == 0:
-        dict_choice = self.opener_moves
-      elif self.phase == 1:
-        dict_choice = self.main_moves
-      else:
-        dict_choice = self.closer_moves
-      
-      random_moves = random.sample(list(dict_choice.keys()), 3)
+    def game_over(self):
+      return self.phase == 3 or self.curr_energy == 0
+    
+    def get_move_choices(self):      
+      random_moves = random.sample(list(self.curr_moves.keys()), 3)
 
       ret_dict = {}
       for val in random_moves:
-        ret_dict[val] = self.opener_moves[val]
+        ret_dict[val] = self.curr_moves[val]
 
       return ret_dict
       
@@ -502,47 +516,68 @@ class MagicContest(Game):
         return self.main_moves[move_num]
       else:
         return self.closer_moves[move_num]
+      
+    def update_phase(self):
+      if self.go_to_main:
+        self.phase = 1
+      elif not self.closer:
+        self.phase = 3
+      else:
+        self.phase += 1
+      
+      if self.phase == 0:
+        self.curr_moves = self.opener_moves
+      elif self.phase == 1:
+        self.curr_moves = self.main_moves
+      else:
+        self.curr_moves = self.closer_moves
+
     
     def apply_opener(self, move_num, color_select, num_convo):
       self.moves.append(self.opener_moves[move_num][1])
       if move_num == 0:
         if color_select == self.fav_color:
           self.multiplier = 1.5
+        else:
+          self.multiplier = 1.1
       elif move_num == 1:
         self.multiplier = -1
         self.goal = -70
       elif move_num == 2:
-        self.points += 30
+        self.points += int(self.multiplier * 30)
       elif move_num == 3:
         if num_convo > 0:
           self.multiplier = 1.5
       elif move_num == 4:
         self.goal = 70
+      self.go_to_main = True
 
     def apply_main(self, move_num, color_select, num_convo):
+      self.go_to_main = False
       self.moves.append(self.main_moves[move_num][1])
       if move_num == 0:
         if self.competitive:
-          self.points += 50
+          self.points += int(self.multiplier * 50)
         else:
-          self.points += 10
+          self.points += int(self.multiplier * 10)
       elif move_num == 1:
-        self.points += (60 - self.hunger)
+        self.points += int(self.multiplier * (60 - self.hunger))
       elif move_num == 2:
-        self.points += 10 + self.happiness
+        self.points += int(self.multiplier*(10 + self.happiness))
       elif move_num == 3:
-        self.points += (10*num_convo)
+        self.points += int(self.multiplier*(10*num_convo))
       elif move_num == 4:
-        self.points += 20
+        self.points += int(self.multiplier*20)
         if random.random() > (50 - self.happiness + self.hunger):
           self.go_to_main = True
 
     def apply_closer(self, move_num, color_select, num_convo):
       self.moves.append(self.closer_moves[move_num][1])
       if move_num == 0:
-        self.points += 50
+        self.points += int(self.multiplier*50)
       elif move_num == 1:
-        self.points += self.curr_energy
+        self.points += int(self.multiplier*self.curr_energy)
+        self.use_energy(self.curr_energy)
       elif move_num == 2:
         self.go_to_main = True
         self.closer = False
@@ -606,17 +641,19 @@ class MagicContest(Game):
       not_competitive = "" if self.competitive else "not "
       not_talkative = "" if self.talkative else "not "
       foods = "sweet" if self.likesSweet else "savory"
+      has_won = "They won the contest" if self.has_won() else "They were not able to win the contest"
       system_prompt = f"""You are the event announcer for a magical talent show.
-        You are summerize the events of the latest contestant in no more than 3 paragraphs.
+        You are to summerize the events of the latest contestant in no more than 3 paragraphs.
         These events are brief summeries seperated by commas that should be elaborated on using
         the contestant's features where possible.
-        The contestant is a tamagochi-like pet named {self.name}.
+        The contestant is a magical pet named {self.name}.
         They look like this: {self.physical_details}.
         Their favorite color is {self.fav_color}.
         They are {not_competitive}competitive.
         They are {not_talkative}talkative.
         They like {foods} foods.
-        Your conversation style is: {self.conversationStyle}.
+        Their conversation style is: {self.conversationStyle}.
+        {has_won}
         Rewrite the following series of events as specified."""
       
       user_prompt = ""
@@ -624,7 +661,7 @@ class MagicContest(Game):
         user_prompt = user_prompt + ", " + str(event)
             
       response = self.client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
           {
             "role": "system",

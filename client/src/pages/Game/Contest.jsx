@@ -9,6 +9,10 @@ export default function Contest(){
 
     const [currEnergy, setCurrEnergy] = useState(100)
     const [maxEnergy, setMaxEnergy] = useState(100)
+    const [currPoints, setCurrPoints] = useState(0)
+    const [goalPoints, setGoalPoints] = useState(100)
+    const [phase, setPhase] = useState("Opener")
+    const [multiplier, setMultiplier] = useState(1)
     
     const [discussion, setDiscussion] = useState("")
     const [numTalks, setNumTalks] = useState(0)
@@ -26,10 +30,9 @@ export default function Contest(){
 
     const [colorSelect, setColor] = useState("red")
 
-    const [uploadedImage, setUploadedImage] = useState(null);
+    const [summary, setSummary] = useState("")
     
     const handleResetContest = (key) => {
-        // setResponse("Ok, Let's start a new game!")
         fetch('http://localhost:8000/api/new_contest', {
             method: 'POST',
             headers: {
@@ -43,10 +46,19 @@ export default function Contest(){
         .then(data => {
             setMaxEnergy(data.maxEnergy);
             setCurrEnergy(data.currEnergy);
+            setCurrPoints(data.currPoints);
+            setGoalPoints(data.goalPoints);
+            setPhase(data.phase);
+            setMultiplier(data.multiplier);
+            setSummary("");
         })
         .catch(error => console.error('Error:', error));
 
-        fetch('http://localhost:8000/api/contest_moves', {
+        handleNewMoves();
+    };
+
+    const handleNewMoves = (key) => {
+        fetch('http://localhost:8000/api/new_contest_moves', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -67,25 +79,29 @@ export default function Contest(){
         .catch(error => console.error('Error:', error));
     };
 
-    const handleNewMoves = (key) => {
-        fetch('http://localhost:8000/api/contest_moves', {
+    const handleMakeMove = (key) => {
+        setSummary("Making the Move...")
+        fetch('http://localhost:8000/api/move_contest', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ 
+                move: key,
+                colorSelect: colorSelect,
+                numTalks: numTalks
+             })
         })
         .then(response => response.json())
         .then(data => {
-            setM1Num(data.m1Num)
-            setM1Name(data.m1Name)
-            setM1Desc(data.m1Desc)
-            setM2Num(data.m2Num)
-            setM2Name(data.m2Name)
-            setM2Desc(data.m2Desc)
-            setM3Num(data.m3Num)
-            setM3Name(data.m3Name)
-            setM3Desc(data.m3Desc)
+            setPhase(data.phase)
+            setCurrEnergy(data.currEnergy)
+            setCurrPoints(data.currPoints)
+            setGoalPoints(data.goalPoints)
+            setMultiplier(data.multiplier)
+            setSummary(data.summary)
         })
+        .then(handleNewMoves())
         .catch(error => console.error('Error:', error));
     };
 
@@ -138,24 +154,25 @@ export default function Contest(){
 
                 <div className="right-column">
                     <p>
-                        TEMP: {numTalks}
+                        Current Phase: {phase}
                     </p>
-                    <p>
-                        TEMP: {colorSelect}
-                    </p>
-                    <select name="Select Color" id="colorSelect">
+                    <p>{summary}</p>
+                    <p></p>
+                    <button id="Move1" onClick={(e) => handleMakeMove(e.target.value)} value={m1Num}>{m1Name}<br />{m1Desc}</button>
+                    <button id="Move2" onClick={(e) => handleMakeMove(e.target.value)} value={m2Num}>{m2Name}<br />{m2Desc}</button>
+                    <button id="Move3" onClick={(e) => handleMakeMove(e.target.value)} value={m3Num}>{m3Name}<br />{m3Desc}</button>
+                    <p>------Game Info------</p>
+                    <p>Current Points: {currPoints}</p>
+                    <p>Point Goal: {goalPoints}</p>
+                    <p>Current Point Multiplier: {multiplier}x</p>
+                    <label htmlFor="colorSelect">Some Moves Require You to Select a Color</label>
+                    <select name="Select Color" id="colorSelect" onChange={(e) => setColor(e.target.value)}>
                         <option value="red">Red</option>
                         <option value="green">Green</option>
                         <option value="yellow">Yellow</option>
                         <option value="orange">Orange</option>
                         <option value="violet">Violet</option>
                     </select>
-                    <p></p>
-                    <button id="Move1">{m1Name}<br />{m1Desc}</button>
-                    <button id="Move2">{m2Name}<br />{m2Desc}</button>
-                    <button id="Move3">{m3Name}<br />{m3Desc}</button>
-                    <p></p>
-                    <button id="NewMoves" onClick={handleNewMoves}>New Moves</button>
                 </div>
 
             </div>

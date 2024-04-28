@@ -57,7 +57,8 @@ def new_contest():
     data = request.json
     hunger = data.get("hunger")
     contest.set_energy(100-(2*hunger))
-    return jsonify({"maxEnergy" : contest.get_energy()[0], "currEnergy" : contest.get_energy()[1]})  
+    return jsonify({"maxEnergy" : contest.get_energy()[0], "currEnergy" : contest.get_energy()[1], 
+                    "currPoints" : 0, "goalPoints" : 100, "phase" : "Opener", "multiplier" : 1})  
 
 @app.route('/api/get_ttt', methods=['POST'])
 def get_ttt():
@@ -151,8 +152,8 @@ def move_c4():
 
     return jsonify({"board" : connect4.get_board(), "response" : response})
 
-@app.route('/api/contest_moves', methods=['POST'])
-def contest_moves():
+@app.route('/api/new_contest_moves', methods=['POST'])
+def new_contest_moves():
     moves = contest.get_move_choices()
     key_list = list(moves.keys())
     ret_dict = {}
@@ -167,6 +168,45 @@ def contest_moves():
     ret_dict['m3Desc'] = moves[key_list[2]][1]
 
     return jsonify(ret_dict)
+
+@app.route('/api/move_contest', methods=['POST'])
+def move_contest():
+    data = request.json
+    move = int(data.get("move"))
+    color_select = data.get("colorSelect")
+    num_convo = data.get("numTalks")
+    summary = ""
+
+    if contest.game_over():
+        summary = "The Contest is Over! Start a new Game to Play Again!"
+        return jsonify({"phase": contest.get_phase(), "currEnergy" : contest.get_energy()[1],
+                        "currPoints" : contest.get_points(), "goalPoints" : contest.get_goal(),
+                        "multiplier" : contest.get_multiplier(), "summary" : summary})
+
+    if contest.phase == 0:
+        contest.apply_opener(move, color_select, num_convo)
+    elif contest.phase == 1:
+        contest.apply_main(move, color_select, num_convo)
+    elif contest.phase == 2: 
+        contest.apply_closer(move, color_select, num_convo)
+    
+    contest.update_phase()
+    contest.use_energy(10)
+
+    phase = contest.get_phase()
+    if phase == 0:
+        ret_phase = "Opener"
+    elif phase == 1:
+        ret_phase = "Main"
+    elif phase == 2:
+        ret_phase = "Closer"
+    else:
+        ret_phase = "End of Show"
+        summary = contest.narrate_game()
+
+    return jsonify({"phase": ret_phase, "currEnergy" : contest.get_energy()[1],
+                    "currPoints" : contest.get_points(), "goalPoints" : contest.get_goal(),
+                     "multiplier" : contest.get_multiplier(), "summary" : summary})
 
 @app.route('/api/contest_pet_talk', methods=['POST'])
 def pet_talk():
