@@ -20,3 +20,6 @@
 
 # ignore uploads
 /pet_generation_images/uploads
+
+# ignore audio
+/scripts/audio
