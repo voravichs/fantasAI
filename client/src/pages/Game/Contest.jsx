@@ -5,7 +5,7 @@ import './Contest.css'; // Import your CSS file
 import { useGlobalState } from '../../PetClass';
 
 export default function Contest(){
-    const {hunger, setHunger,} = useGlobalState();
+    const {happiness, hunger} = useGlobalState();
 
     const [currEnergy, setCurrEnergy] = useState(100)
     const [maxEnergy, setMaxEnergy] = useState(100)
@@ -80,29 +80,42 @@ export default function Contest(){
     };
 
     const handleMakeMove = (key) => {
-        setSummary("Making the Move...")
-        fetch('http://localhost:8000/api/move_contest', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                move: key,
-                colorSelect: colorSelect,
-                numTalks: numTalks
-             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            setPhase(data.phase)
-            setCurrEnergy(data.currEnergy)
-            setCurrPoints(data.currPoints)
-            setGoalPoints(data.goalPoints)
-            setMultiplier(data.multiplier)
-            setSummary(data.summary)
-        })
-        .then(handleNewMoves())
-        .catch(error => console.error('Error:', error));
+        if (summary != "Making the Move..." && phase != "End of Show")
+        {
+            setSummary("Making the Move...")
+            fetch('http://localhost:8000/api/move_contest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    move: key,
+                    colorSelect: colorSelect,
+                    numTalks: numTalks,
+                    hunger: hunger,
+                    happiness: happiness
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                setPhase(data.phase)
+                setCurrEnergy(data.currEnergy)
+                setCurrPoints(data.currPoints)
+                setGoalPoints(data.goalPoints)
+                setMultiplier(data.multiplier)
+                setSummary(data.summary)
+                setM1Num(data.m1Num)
+                setM1Name(data.m1Name)
+                setM1Desc(data.m1Desc)
+                setM2Num(data.m2Num)
+                setM2Name(data.m2Name)
+                setM2Desc(data.m2Desc)
+                setM3Num(data.m3Num)
+                setM3Name(data.m3Name)
+                setM3Desc(data.m3Desc)
+            })
+            .catch(error => console.error('Error:', error));
+        }
     };
 
     const handleAskPet = (key) => {
@@ -150,6 +163,7 @@ export default function Contest(){
                         onChange={(e) => setDiscussion(e.target.value)}
                     ></textarea>
                     <button id="generate-btn" onClick={handleAskPet}>Talk with your pet</button>
+                    <button id="reset" onClick={handleNewMoves}>Reset!!</button>
                 </div>
 
                 <div className="right-column">
@@ -165,6 +179,8 @@ export default function Contest(){
                     <p>Current Points: {currPoints}</p>
                     <p>Point Goal: {goalPoints}</p>
                     <p>Current Point Multiplier: {multiplier}x</p>
+                    <p>Current Hunger Level: {hunger}</p>
+                    <p>Current Happiness Level: {happiness}</p>
                     <label htmlFor="colorSelect">Some Moves Require You to Select a Color</label>
                     <select name="Select Color" id="colorSelect" onChange={(e) => setColor(e.target.value)}>
                         <option value="red">Red</option>

@@ -419,22 +419,26 @@ class MagicContest(Game):
         2 : 10 + happiness points
         3 : 10 * # questions points
         4 : 20 points, 50 + happiness - hunger % to go again
+        5 : 10 + hunger points
       '''
       self.main_moves = {0 : ("Driven Demolition", "Focus your pet on winning by having them use magic to destroy tough materials."),
                          1 : ("Food Frenzy", "Have your pet summon a lot of food for the judges... and some for the pet as well."),
                          2 : ("Cheerful Confetti", "Leverage your pet's positive energy and perform cheerful magic displays."),
                          3 : ("Lecture Learning", "Have your pet use their magic to enhance their voice and performance to charm the judges and the crowd."),
-                         4 : ("Combo Craze", "Have your pet perform a quick magic display. If they are motivated it may just allow your pet to perform again.")
+                         4 : ("Combo Craze", "Have your pet perform a quick magic display. If they are motivated it may just allow your pet to perform again."),
+                         5 : ("Eating Entertainment", "Have your pet show off just how much they can eat. The hungrier they are, the better.")
                          }
       
       '''
         0 : 50 points
         1 : remaining energy points
         2 : Take another main phase, with no closer at the end
+        3 : -10 points
       '''
       self.closer_moves = {0 : ("End it With a Bang", "Get your pet to finish their show with a large magical display."),
                            1 : ("One Last Push", "Have your pet expend all their energy for a final magical performance."),
-                           2 : ("Encore", "Have your pet perform another main performance instead of a closer")
+                           2 : ("Encore", "Have your pet perform another main performance instead of a closer"),
+                           3 : ("Do The Impossible", "Have your pet finish with style by performing impossible feats of magic. That couldn't go wrong, right?")
                          }
       
       self.curr_moves = self.opener_moves
@@ -478,7 +482,7 @@ class MagicContest(Game):
     def get_multiplier(self):
       return self.multiplier
 
-    def set_attributes(self, name, phys, color, talk, compet, hunger_speed, sweets, happiness, hunger, conversation):
+    def set_attributes(self, name, phys, color, talk, compet, hunger_speed, sweets, conversation):
       self.name = name
       self.physical_details = phys
       self.fav_color = color
@@ -486,13 +490,15 @@ class MagicContest(Game):
       self.competitive = compet
       self.quicklyHungry = hunger_speed
       self.likesSweet = sweets
-      self.happiness = happiness
-      self.hunger = hunger
       self.conversationStyle = conversation
 
     def get_attributes(self):
       return (self.name, self.physical_details, self.fav_color, self.talkative, 
               self.competitive, self.quicklyHungry, self.likesSweet, self.happiness, self.hunger, self.conversationStyle)
+
+    def set_hunger_happiness(self, hunger, happiness):
+      self.happiness = happiness
+      self.hunger = hunger
 
     def has_won(self):
       return self.points >= self.goal if self.goal > 0 else self.points <= self.goal
@@ -570,6 +576,8 @@ class MagicContest(Game):
         self.points += int(self.multiplier*20)
         if random.random() > (50 - self.happiness + self.hunger):
           self.go_to_main = True
+      elif move_num ==5:
+        self.points += int(self.multiplier*(10+self.hunger))
 
     def apply_closer(self, move_num, color_select, num_convo):
       self.moves.append(self.closer_moves[move_num][1])
@@ -581,6 +589,8 @@ class MagicContest(Game):
       elif move_num == 2:
         self.go_to_main = True
         self.closer = False
+      elif move_num == 3:
+        self.points += int(self.multiplier*-20)
 
     def evaluate_move(self, move_num, color_select, num_convo):
       if self.phase == 0:
@@ -623,6 +633,11 @@ class MagicContest(Game):
             return "is a bad choice"
         elif move_num == 4:
           return "is a good choice if they want to take risks"
+        elif move_num == 5:
+          if self.hunger > 20:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
       elif self.phase == 2:
         if move_num == 0:
           if self.points >= self.goal - 50:
@@ -636,6 +651,8 @@ class MagicContest(Game):
             return "is a bad choice"
         elif move_num == 2:
           return "is a good choice if they want to take risks"
+        elif move_num == 3:
+          return "is ALWAYS a bad idea"
         
     def narrate_game(self):
       not_competitive = "" if self.competitive else "not "

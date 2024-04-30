@@ -175,13 +175,8 @@ def move_contest():
     move = int(data.get("move"))
     color_select = data.get("colorSelect")
     num_convo = data.get("numTalks")
+    contest.set_hunger_happiness(data.get("hunger"), data.get("happiness"))
     summary = ""
-
-    if contest.game_over():
-        summary = "The Contest is Over! Start a new Game to Play Again!"
-        return jsonify({"phase": contest.get_phase(), "currEnergy" : contest.get_energy()[1],
-                        "currPoints" : contest.get_points(), "goalPoints" : contest.get_goal(),
-                        "multiplier" : contest.get_multiplier(), "summary" : summary})
 
     if contest.phase == 0:
         contest.apply_opener(move, color_select, num_convo)
@@ -204,9 +199,15 @@ def move_contest():
         ret_phase = "End of Show"
         summary = contest.narrate_game()
 
+    moves = contest.get_move_choices()
+    key_list = list(moves.keys())
+
     return jsonify({"phase": ret_phase, "currEnergy" : contest.get_energy()[1],
                     "currPoints" : contest.get_points(), "goalPoints" : contest.get_goal(),
-                     "multiplier" : contest.get_multiplier(), "summary" : summary})
+                    "multiplier" : contest.get_multiplier(), "summary" : summary,
+                    "m1Num": key_list[0], "m1Name": moves[key_list[0]][0], "m1Desc": moves[key_list[0]][1],
+                    "m2Num": key_list[1], "m2Name": moves[key_list[1]][0], "m2Desc": moves[key_list[1]][1],
+                    "m3Num": key_list[2], "m3Name": moves[key_list[2]][0], "m3Desc": moves[key_list[2]][1]})
 
 @app.route('/api/contest_pet_talk', methods=['POST'])
 def pet_talk():
@@ -343,7 +344,6 @@ def load_pet_for_chat():
         pet.get("personality").get("competitive"),
         pet.get("personality").get("quicklyHungry"),
         pet.get("personality").get("likesSweet"),
-        pet.get("personality").get("happiness"),
         pet.get("personality").get("conversationStyle")
     )
     
