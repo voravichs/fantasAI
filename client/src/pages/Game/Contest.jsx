@@ -163,7 +163,6 @@ export default function Contest(){
                         onChange={(e) => setDiscussion(e.target.value)}
                     ></textarea>
                     <button id="generate-btn" onClick={handleAskPet}>Talk with your pet</button>
-                    <button id="reset" onClick={handleNewMoves}>Reset!!</button>
                 </div>
 
                 <div className="right-column">
