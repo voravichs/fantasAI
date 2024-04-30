@@ -85,6 +85,16 @@ button {
   transition: background-color 0.3s;
 }
 
+select {
+  padding: 10px 20px;
+  background-color: #ba69a6; /* Light muted magenta for button background */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
 button:hover {
   background-color: #934a75; /* Darker magenta on hover */
 }

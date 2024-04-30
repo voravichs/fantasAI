@@ -4,6 +4,7 @@ from chatbot import Chatbot
 from feeding import FeedPetAction
 from games import TicTacToe
 from games import ConnectFour
+from games import MagicContest
 from petgen import PetGeneration
 import os
 from flask_cors import CORS
@@ -18,6 +19,7 @@ chatbot = Chatbot()  # Instantiate your Chatbot class
 feedPetAction = FeedPetAction()
 ttt = TicTacToe([[0,0,0], [0,0,0], [0,0,0]])
 connect4 = ConnectFour([[0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]])
+contest = MagicContest()
 petGen = PetGeneration()
 
 # Define the path to the React build folder
@@ -39,27 +41,24 @@ def generate_image():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route('/api/setup_games', methods=['POST'])
-def setup_games():
-    data = request.json
-    name = data.get("name")
-    physical_details = data.get("physical_details")
-    fav_color = data.get("fav_color")
-    competitive = data.get("competitive")
-    ttt.set_attributes(name, physical_details, fav_color, competitive)
-    connect4.set_attributes(name, physical_details, fav_color, competitive)
-    return ""
-
 @app.route('/api/new_ttt', methods=['POST'])
 def new_ttt():
     ttt.reset()
     return jsonify({"board" : ttt.get_board()})
 
-
 @app.route('/api/new_c4', methods=['POST'])
 def new_c4():
     connect4.reset()
     return jsonify({"board" : connect4.get_board()})  
+
+@app.route('/api/new_contest', methods=['POST'])
+def new_contest():
+    contest.reset()
+    data = request.json
+    hunger = data.get("hunger")
+    contest.set_energy(100-(2*hunger))
+    return jsonify({"maxEnergy" : contest.get_energy()[0], "currEnergy" : contest.get_energy()[1], 
+                    "currPoints" : 0, "goalPoints" : 100, "phase" : "Opener", "multiplier" : 1})  
 
 @app.route('/api/get_ttt', methods=['POST'])
 def get_ttt():
@@ -152,6 +151,77 @@ def move_c4():
         response = connect4.talk("That isn't a number. Choose a different one!")
 
     return jsonify({"board" : connect4.get_board(), "response" : response})
+
+@app.route('/api/new_contest_moves', methods=['POST'])
+def new_contest_moves():
+    moves = contest.get_move_choices()
+    key_list = list(moves.keys())
+    ret_dict = {}
+    ret_dict['m1Num'] = key_list[0]
+    ret_dict['m1Name'] = moves[key_list[0]][0]
+    ret_dict['m1Desc'] = moves[key_list[0]][1]
+    ret_dict['m2Num'] = key_list[1]
+    ret_dict['m2Name'] = moves[key_list[1]][0]
+    ret_dict['m2Desc'] = moves[key_list[1]][1]
+    ret_dict['m3Num'] = key_list[2]
+    ret_dict['m3Name'] = moves[key_list[2]][0]
+    ret_dict['m3Desc'] = moves[key_list[2]][1]
+
+    return jsonify(ret_dict)
+
+@app.route('/api/move_contest', methods=['POST'])
+def move_contest():
+    data = request.json
+    move = int(data.get("move"))
+    color_select = data.get("colorSelect")
+    num_convo = data.get("numTalks")
+    contest.set_hunger_happiness(data.get("hunger"), data.get("happiness"))
+    summary = ""
+
+    if contest.phase == 0:
+        contest.apply_opener(move, color_select, num_convo)
+    elif contest.phase == 1:
+        contest.apply_main(move, color_select, num_convo)
+    elif contest.phase == 2: 
+        contest.apply_closer(move, color_select, num_convo)
+    
+    contest.update_phase()
+    contest.use_energy(10)
+
+    phase = contest.get_phase()
+    if phase == 0:
+        ret_phase = "Opener"
+    elif phase == 1:
+        ret_phase = "Main"
+    elif phase == 2:
+        ret_phase = "Closer"
+    else:
+        ret_phase = "End of Show"
+        summary = contest.narrate_game()
+
+    moves = contest.get_move_choices()
+    key_list = list(moves.keys())
+
+    return jsonify({"phase": ret_phase, "currEnergy" : contest.get_energy()[1],
+                    "currPoints" : contest.get_points(), "goalPoints" : contest.get_goal(),
+                    "multiplier" : contest.get_multiplier(), "summary" : summary,
+                    "m1Num": key_list[0], "m1Name": moves[key_list[0]][0], "m1Desc": moves[key_list[0]][1],
+                    "m2Num": key_list[1], "m2Name": moves[key_list[1]][0], "m2Desc": moves[key_list[1]][1],
+                    "m3Num": key_list[2], "m3Name": moves[key_list[2]][0], "m3Desc": moves[key_list[2]][1]})
+
+@app.route('/api/contest_pet_talk', methods=['POST'])
+def pet_talk():
+    data = request.json
+    user_prompt = data.get("discussion")
+    moves = [data.get("m1Num"), data.get("m2Num"), data.get("m3Num")]
+    color_select = data.get("colorSelect")
+    num_convo = data.get("numTalks")
+
+    return jsonify({"response": contest.advise_player(user_prompt, moves, color_select, num_convo)})
+
+@app.route('/api/run_contest', methods=['POST'])
+def run_contest():
+    pass
 
 
 @app.route('/api/feed_talk_to_pet', methods=['POST'])
@@ -265,6 +335,17 @@ def load_pet_for_chat():
         pet.get("personality").get("fav_color"), 
         pet.get("personality").get("competitive"),
         pet.get("personality").get("conversationStyle"))
+    
+    contest.set_attributes(
+        pet.get("identity").get("name"), 
+        pet.get("identity").get("physical_details"), 
+        pet.get("personality").get("fav_color"), 
+        pet.get("personality").get("talkative"),
+        pet.get("personality").get("competitive"),
+        pet.get("personality").get("quicklyHungry"),
+        pet.get("personality").get("likesSweet"),
+        pet.get("personality").get("conversationStyle")
+    )
     
     return jsonify({"response": "good"})
 

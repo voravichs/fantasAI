@@ -14,6 +14,7 @@ class Game():
     self.physical_details = ""
     self.fav_color = ""
     self.competitive = True
+    self.conversationStyle = ""
 
   def get_attributes(self):
     return (self.name, self.physical_details, self.fav_color, self.competitive)
@@ -374,6 +375,363 @@ class ConnectFour(Game):
         ],
         temperature=1,
         max_tokens=1,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      return response.choices[0].message.content
+
+
+class MagicContest(Game):
+
+    def __init__(self):
+      super().__init__()
+      self.name = ""
+      self.physical_details = ""
+      self.fav_color = ""
+      self.talkative = True
+      self.competitive = True
+      self.quicklyHungry = True
+      self.likesSweet = True
+      self.happiness = 0
+      self.hunger = 0
+      self.conversationStyle = ""
+      self.set_energy(100)
+      self.goal = 100
+      '''
+        0 : 1.5 multiplier if correct color
+        1 : All point gains are negative & goal = -70
+        2 : get 30 points
+        3 : if talked to pet, 1.5 multiplier
+        4 : goal lowered to 70
+      '''
+      self.opener_moves = {0 : ("Color Coordination", "Coordinate a routine with your pet so the magic show has a colorful theme."),
+                            1 : ("So Bad It's Good", "Set up a plan with your pet where if you fail so spectacularly you may just win."),
+                            2 : ("Head Start","Get started with your show early. Who needs plans when you have more magic then anyone else."),
+                            3 : ("Pep Talk","Talk to your pet and motivate them to do their best."),
+                            4 : ("Low Expectations", "Establish low expectations with the judges. If they expect less it should be easier to pass.")
+                            }
+      
+      '''
+        0 : 50 points if competative. 10 otherwise
+        1 : 60 - hunger points
+        2 : 10 + happiness points
+        3 : 10 * # questions points
+        4 : 20 points, 50 + happiness - hunger % to go again
+        5 : 10 + hunger points
+      '''
+      self.main_moves = {0 : ("Driven Demolition", "Focus your pet on winning by having them use magic to destroy tough materials."),
+                         1 : ("Food Frenzy", "Have your pet summon a lot of food for the judges... and some for the pet as well."),
+                         2 : ("Cheerful Confetti", "Leverage your pet's positive energy and perform cheerful magic displays."),
+                         3 : ("Lecture Learning", "Have your pet use their magic to enhance their voice and performance to charm the judges and the crowd."),
+                         4 : ("Combo Craze", "Have your pet perform a quick magic display. If they are motivated it may just allow your pet to perform again."),
+                         5 : ("Eating Entertainment", "Have your pet show off just how much they can eat. The hungrier they are, the better.")
+                         }
+      
+      '''
+        0 : 50 points
+        1 : remaining energy points
+        2 : Take another main phase, with no closer at the end
+        3 : -10 points
+      '''
+      self.closer_moves = {0 : ("End it With a Bang", "Get your pet to finish their show with a large magical display."),
+                           1 : ("One Last Push", "Have your pet expend all their energy for a final magical performance."),
+                           2 : ("Encore", "Have your pet perform another main performance instead of a closer"),
+                           3 : ("Do The Impossible", "Have your pet finish with style by performing impossible feats of magic. That couldn't go wrong, right?")
+                         }
+      
+      self.curr_moves = self.opener_moves
+      self.reset()
+
+    def reset(self):
+      self.phase = 0
+      self.points = 0
+      self.goal = 100
+      self.curr_energy = self.max_energy
+      self.multiplier = 1
+      self.go_to_main = False
+      self.closer = True
+      self.moves = []
+      self.curr_moves = self.opener_moves
+
+    def set_energy(self, max_energy):
+      self.max_energy = max_energy
+      self.curr_energy = max_energy
+
+    def use_energy(self, energy_spent):
+      self.curr_energy -= energy_spent
+      if self.curr_energy < 0:
+        self.curr_energy = 0
+
+    def get_energy(self):
+      return (self.max_energy, self.curr_energy)
+    
+    def set_phase(self, phase):
+      self.phase = phase
+
+    def get_phase(self):
+      return self.phase
+    
+    def get_points(self):
+      return self.points
+    
+    def get_goal(self):
+      return self.goal
+    
+    def get_multiplier(self):
+      return self.multiplier
+
+    def set_attributes(self, name, phys, color, talk, compet, hunger_speed, sweets, conversation):
+      self.name = name
+      self.physical_details = phys
+      self.fav_color = color
+      self.talkative = talk
+      self.competitive = compet
+      self.quicklyHungry = hunger_speed
+      self.likesSweet = sweets
+      self.conversationStyle = conversation
+
+    def get_attributes(self):
+      return (self.name, self.physical_details, self.fav_color, self.talkative, 
+              self.competitive, self.quicklyHungry, self.likesSweet, self.happiness, self.hunger, self.conversationStyle)
+
+    def set_hunger_happiness(self, hunger, happiness):
+      self.happiness = happiness
+      self.hunger = hunger
+
+    def has_won(self):
+      return self.points >= self.goal if self.goal > 0 else self.points <= self.goal
+    
+    def game_over(self):
+      return self.phase == 3 or self.curr_energy == 0
+    
+    def get_move_choices(self):      
+      random_moves = random.sample(list(self.curr_moves.keys()), 3)
+
+      ret_dict = {}
+      for val in random_moves:
+        ret_dict[val] = self.curr_moves[val]
+
+      return ret_dict
+      
+    def get_move(self, move_num):
+      if self.phase == 0:
+        return self.opener_moves[move_num]
+      elif self.phase == 1:
+        return self.main_moves[move_num]
+      else:
+        return self.closer_moves[move_num]
+      
+    def update_phase(self):
+      if self.go_to_main:
+        self.phase = 1
+      elif not self.closer:
+        self.phase = 3
+      else:
+        self.phase += 1
+      
+      if self.phase == 0:
+        self.curr_moves = self.opener_moves
+      elif self.phase == 1:
+        self.curr_moves = self.main_moves
+      else:
+        self.curr_moves = self.closer_moves
+
+    
+    def apply_opener(self, move_num, color_select, num_convo):
+      self.moves.append(self.opener_moves[move_num][1])
+      if move_num == 0:
+        if color_select == self.fav_color:
+          self.multiplier = 1.5
+        else:
+          self.multiplier = 1.1
+      elif move_num == 1:
+        self.multiplier = -1
+        self.goal = -70
+      elif move_num == 2:
+        self.points += int(self.multiplier * 30)
+      elif move_num == 3:
+        if num_convo > 0:
+          self.multiplier = 1.5
+      elif move_num == 4:
+        self.goal = 70
+      self.go_to_main = True
+
+    def apply_main(self, move_num, color_select, num_convo):
+      self.go_to_main = False
+      self.moves.append(self.main_moves[move_num][1])
+      if move_num == 0:
+        if self.competitive:
+          self.points += int(self.multiplier * 50)
+        else:
+          self.points += int(self.multiplier * 10)
+      elif move_num == 1:
+        self.points += int(self.multiplier * (60 - self.hunger))
+      elif move_num == 2:
+        self.points += int(self.multiplier*(10 + self.happiness))
+      elif move_num == 3:
+        self.points += int(self.multiplier*(10*num_convo))
+      elif move_num == 4:
+        self.points += int(self.multiplier*20)
+        if random.random() > (50 - self.happiness + self.hunger):
+          self.go_to_main = True
+      elif move_num ==5:
+        self.points += int(self.multiplier*(10+self.hunger))
+
+    def apply_closer(self, move_num, color_select, num_convo):
+      self.moves.append(self.closer_moves[move_num][1])
+      if move_num == 0:
+        self.points += int(self.multiplier*50)
+      elif move_num == 1:
+        self.points += int(self.multiplier*self.curr_energy)
+        self.use_energy(self.curr_energy)
+      elif move_num == 2:
+        self.go_to_main = True
+        self.closer = False
+      elif move_num == 3:
+        self.points += int(self.multiplier*-20)
+
+    def evaluate_move(self, move_num, color_select, num_convo):
+      if self.phase == 0:
+        if move_num == 0:
+          if color_select == self.fav_color:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 1:
+          return "is a good choice if they are going for negative points"
+        elif move_num == 2:
+          return "is a good choice"
+        elif move_num == 3:
+          if num_convo > 0:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 4:
+          return "is a good choice"
+      elif self.phase == 1:
+        if move_num == 0:
+          if self.competitive:
+            self.points += 50
+          else:
+            self.points += 10
+        elif move_num == 1:
+          if self.hunger < 20:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 2:
+          if self.happiness > 30:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 3:
+          if num_convo > 3:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 4:
+          return "is a good choice if they want to take risks"
+        elif move_num == 5:
+          if self.hunger > 20:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+      elif self.phase == 2:
+        if move_num == 0:
+          if self.points >= self.goal - 50:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 1:
+          if self.points >= self.goal - self.curr_energy:
+            return "is a good choice"
+          else:
+            return "is a bad choice"
+        elif move_num == 2:
+          return "is a good choice if they want to take risks"
+        elif move_num == 3:
+          return "is ALWAYS a bad idea"
+        
+    def narrate_game(self):
+      not_competitive = "" if self.competitive else "not "
+      not_talkative = "" if self.talkative else "not "
+      foods = "sweet" if self.likesSweet else "savory"
+      has_won = "They won the contest" if self.has_won() else "They were not able to win the contest"
+      system_prompt = f"""You are the event announcer for a magical talent show.
+        You are to summerize the events of the latest contestant in no more than 3 paragraphs.
+        These events are brief summeries seperated by commas that should be elaborated on using
+        the contestant's features where possible.
+        The contestant is a magical pet named {self.name}.
+        They look like this: {self.physical_details}.
+        Their favorite color is {self.fav_color}.
+        They are {not_competitive}competitive.
+        They are {not_talkative}talkative.
+        They like {foods} foods.
+        Their conversation style is: {self.conversationStyle}.
+        {has_won}
+        Rewrite the following series of events as specified."""
+      
+      user_prompt = ""
+      for event in self.moves:
+        user_prompt = user_prompt + ", " + str(event)
+            
+      response = self.client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+          {
+            "role": "system",
+            "content": system_prompt
+          },
+          {
+            "role": "user",
+            "content": user_prompt
+          }
+        ],
+        temperature=1,
+        max_tokens=512,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+      )
+
+      return response.choices[0].message.content
+
+    def advise_player(self, user_prompt, moves, color_select, num_convo):
+      not_competitive = "" if self.competitive else "not "
+      not_talkative = "" if self.talkative else "not "
+      foods = "sweet" if self.likesSweet else "savory"
+
+      system_prompt = f"""You are a friendly tamagochi-like pet named {self.name}.
+        You look like this: {self.physical_details}.
+        Your favorite color is {self.fav_color}.
+        You are {not_competitive}competitive.
+        You are {not_talkative}talkative.
+        You like {foods} foods.
+        Your conversation style is: {self.conversationStyle}.
+        You are currently in a magical talent show. Your friend is advising you on how to perform. They have asked
+        you a question and you are to respond to their question.
+        If they ask about what move they should choose, you should hint and not directly state the following
+        Move {self.get_move(moves[0])[0]} {self.evaluate_move(moves[0], color_select, num_convo)}
+        Move {self.get_move(moves[1])[0]} {self.evaluate_move(moves[1], color_select, num_convo)}
+        Move {self.get_move(moves[2])[0]} {self.evaluate_move(moves[2], color_select, num_convo)}
+        """
+            
+      response = self.client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+          {
+            "role": "system",
+            "content": system_prompt
+          },
+          {
+            "role": "user",
+            "content": user_prompt
+          }
+        ],
+        temperature=1,
+        max_tokens=216,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
