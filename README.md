@@ -1,5 +1,7 @@
 # FantasAI [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+Unofficial Fork of: https://github.com/armaan-rathi/fantasAI
+
 ## Table of Contents:
   1. [Description](#description)
   2. [Usage](#usage)
